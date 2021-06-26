@@ -1,0 +1,28 @@
+html { overflow-y : hidden; }
+
+body {
+  margin: 0;
+  background-color: hsl(0, 0%, 96%);
+}
+
+#import-label {
+  right: 160px;
+}
+
+button {
+  font-family: "Nova Mono";
+}
+
+#import {
+  display: none;
+}
+
+#export {
+  right: 10px;
+}
+
+#import-label, #export {
+  position: fixed;
+  bottom: 2%;
+  z-index: 1;
+}

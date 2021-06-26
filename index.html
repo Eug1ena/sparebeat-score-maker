@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+
+		<title>Sparebeat score maker</title>
+		<meta name="description" content="" />
+
+		<link rel="stylesheet" href="style.css">
+		<link href='https://fonts.googleapis.com/css?family=Nova+Mono' rel='stylesheet' type='text/css'>
+
+		<script src="libs/phina.js"></script>
+		<script src="src/labelfix.js"></script>
+		<script src="src/myclasses.js"></script>
+		<script src="src/loadmenuscene.js"></script>
+		<script src="src/main.js"></script>
+	</head>
+	<body>
+		<div id="import-label">
+			<button onclick="document.getElementById('import').click();">Open file</button>
+			<input type="file" accept=".json" id="import"　/>
+		</div>
+		<button id="export">Export to clipboard</button>
+	</body>
+</html>
