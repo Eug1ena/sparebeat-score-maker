@@ -1,19 +1,19 @@
+// 渡された関数が生成する要素を一定間隔ごとに配置し、スクロールに反応して常に画面内の要素だけが読み込まれた状態を保つグループ。
+// 子要素の状態は外部に保存しなければならない。
+// 今になって見ると内部で保存してくれるようになってた方がいいのかと思う。
 phina.define("InfiniteOf", {
     superClass: 'phina.display.DisplayElement',
-
     init: function(source, pitch, options) {
         this.superInit(options);
-
         this.source = source;
         this.pitch = pitch;
         this.reset();
     },
-
     draw: function() {
-        var scene = this.getRoot();
-        var globalpos = this.globalPosition;
-        var backrate = -Math.floor(Math.min((globalpos.x - (this.pitch.x < 0 ? scene.width : 0)) / this.pitch.x, (globalpos.y - (this.pitch.y < 0 ? scene.height : 0)) / this.pitch.y));
-        var base = this.pitch.clone().mul(backrate + 1);
+        const scene = this.getRoot();
+        const globalpos = this.globalPosition;
+        const backrate = -Math.floor(Math.min((globalpos.x - (this.pitch.x < 0 ? scene.width : 0)) / this.pitch.x, (globalpos.y - (this.pitch.y < 0 ? scene.height : 0)) / this.pitch.y));
+        const base = this.pitch.clone().mul(backrate + 1);
         for(var pos = this.pitch.clone().mul(backrate - 1), i = -1; pos.x - base.x < scene.width && pos.x - base.x > -scene.width && pos.y - base.y < scene.height && pos.y - base.y > -scene.height;
         pos.add(this.pitch), i++) {
             if (i + backrate >= this.nodemin && i + backrate < this.nodemax) continue;
@@ -46,6 +46,7 @@ phina.define("InfiniteOf", {
     }
 });
 
+// 子要素を一定間隔あけて自動配置するグループ要素
 phina.define("List", {
     superClass: 'phina.display.DisplayElement',
     renderChildBySelf: true,

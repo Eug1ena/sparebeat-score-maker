@@ -1,4 +1,4 @@
-Infiniteofphina.namespace(function() {
+phina.namespace(function() {
 	var original = phina.display.Label.prototype.init;
 	phina.display.Label.prototype.init = function() {
 		original.apply(this, arguments);

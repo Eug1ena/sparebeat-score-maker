@@ -1,3 +1,4 @@
+// 現在未使用。title/bpm/artist/startTimeを編集する画面になるはずだった。
 phina.define('MetaSettingScene', {
 	superClass: 'phina.display.DisplayScene',
 	init: function(json) {
