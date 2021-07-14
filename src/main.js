@@ -62,6 +62,8 @@ phina.define('MainScene', {
         // ここは列挙型のようなものに置き換えるべきなように思う
         this.notesData = { easy: [], normal: [], hard: []}; // 3連符でない部分の譜面を表す表
         this.tripletNotesData = { easy: [], normal: [], hard: []}; // 3連符である部分の譜面を表す表
+        this.noteButtons = []; // 3連符でない音符のボタンを表す表
+        this.tripletNoteButtons = { easy: [], normal: [], hard: []}; // 3連符である音符のボタンを表す表
 
         // この4つはクラスにまとめるべきか
         this.notesCount = { easy: 0, normal: 0, hard: 0}; // 譜面全体のノーツ数
@@ -89,8 +91,8 @@ phina.define('MainScene', {
         }).addChildTo(this.screenBottom).setOrigin(0.5, 1);
         this.currentPos.alpha = 0.3;
         this.extend = Button({x: -320, y: -2360, text: "+", width: 48, height: 48}).on("pointstart", function() {
-            barsCount[this.level]++;
-            if (this.lengths[this.level].length < barsCount[this.level]) this.lengths[this.level].push(16);
+            this.barsCount[this.level]++;
+            if (this.lengths[this.level].length < this.barsCount[this.level]) this.lengths[this.level].push(16);
             this.updateTime();
             this.save();
         }.bind(this)).addChildTo(this.score);
@@ -111,7 +113,7 @@ phina.define('MainScene', {
                 }).addChildTo(group);
                 return group;
             }
-            for (var j = 0; j < this.lengths[this.level].length; j++) {
+            for (let j = 0; j < this.lengths[this.level].length; j++) {
                 if (this.lengths[this.level].sum[j] > i) {
                     if (this.lengths[this.level].diff[j] % 4 === 0 && (i - (j === 0 ? 0 : this.lengths[this.level].sum[j - 1])) % 4 === 0) return PathShape({paths: [Vector2(-1000, 0), Vector2(1000, 0)], y: -1, strokeWidth: 1, stroke: '#cccccc'});
                     return Element();
@@ -124,6 +126,9 @@ phina.define('MainScene', {
                 this.notesData[this.level][i] = [NOTHING, NOTHING, NOTHING, NOTHING];
                 this.notesData[this.level][i].bind = NOTHING;
                 this.notesData[this.level][i].random = NOTHING;
+            }
+            if (!this.noteButtons[i]) {
+                this.noteButtons[i] = [null, null, null, null];
             }
             const root = DisplayElement();
             if (this.lengths[this.level].sum.includes(i + 1)) {
@@ -148,7 +153,7 @@ phina.define('MainScene', {
             const self = this;
             if(LANES.some(function (lane) {
                 return this.tripletNotesData[this.level][Math.floor(i / 2) * 3] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2][lane] !== NOTHING;
-            }, this)) for (var j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
+            }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
             else {
                 if (this.newZone) {
                     group.on('pointover', function() {this.setScale(1.1)})
@@ -162,31 +167,10 @@ phina.define('MainScene', {
                         this.tripletNotes.reset();
                     }.bind(this)).setInteractive(true);
                 }
-                for (var j = 0; j < 4; j++) {
-                    var key = RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: colorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
-                    if (!this.newZone) key.on("pointstart", function() {
-                        if (self.notesData[self.level][this.i][this.lane]) {
-                            self.notesCount[self.level]--;
-                            self.notesCountOfBar[self.level][Math.floor(this.i / 16)]--;
-                            if (self.notesData[self.level][this.i][this.lane] === ATTACK) {
-                                self.attackNotesCount[self.level]--;
-                                self.attackNotesCountOfBar[self.level][Math.floor(this.i / 16)]--;
-                            }
-                            self.notesData[self.level][this.i][this.lane] = NOTHING;
-                        } else {
-                            self.notesCount[self.level]++;
-                            self.notesCountOfBar[self.level][Math.floor(this.i / 16)]++;
-                            if (self.notetype === ATTACK) {
-                                self.attackNotesCount[self.level]++;
-                                self.attackNotesCountOfBar[self.level][Math.floor(this.i / 16)]++;
-                            }
-                            self.notesData[self.level][this.i][this.lane] = self.notetype;
-                        }
-                        this.fill = colorOf(self.notesData[self.level][this.i][this.lane]);
-                        self.updateNotesCount();
-                        self.save();
-                        self.tripletNotes.reset();
-                    }).$safe({i: i, lane: j}).setInteractive(true);
+                for (let j = 0; j < 4; j++) {
+                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: colorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                    self.noteButtons[i][j] = key;
+                    if (!this.newZone) key.on("pointstart", function(){ self.toggleNoteAt(i, j); }.bind(self) ).setInteractive(true);
                 }
                 if (this.notesData[this.level][i].bind) {
                     Label({x: -130, text: "["}).on('pointstart', function() {
@@ -211,12 +195,15 @@ phina.define('MainScene', {
                 this.tripletNotesData[this.level][i].bind = NOTHING;
                 this.tripletNotesData[this.level][i].random = NOTHING;
             }
-            var root = DisplayElement();
-            var group = DisplayElement({width: 225, height: 18, y: -10}).addChildTo(root);
-            var self = this;
+            if (!this.tripletNoteButtons[i]) {
+                this.tripletNoteButtons[i] = [null, null, null, null];
+            }
+            const root = DisplayElement();
+            const group = DisplayElement({width: 225, height: 18, y: -10}).addChildTo(root);
+            const self = this;
             if (LANES.some(function (lane) {
                 return this.notesData[this.level][Math.floor(i / 3) * 2] && this.notesData[this.level][Math.floor(i / 3) * 2][lane] !== NOTHING || this.notesData[this.level][Math.floor(i / 3) * 2 + 1] && this.notesData[this.level][Math.floor(i / 3) * 2 + 1][lane] !== NOTHING;
-            }, this)) for (j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 15, fill: "#666666", stroke: null}).addChildTo(group);
+            }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 15, fill: "#666666", stroke: null}).addChildTo(group);
             else {
                 if (this.newZone) {
                     group.on('pointover', group.setScale.bind(group, 1.1))
@@ -230,31 +217,10 @@ phina.define('MainScene', {
                         this.tripletNotes.reset();
                     }.bind(this)).setInteractive(true);
                 }
-                for (j = 0; j < 4; j++) {
-                    var key = RectangleShape({x: j * 60 - 90, width: 50, height: 15, fill: colorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
-                    if (!this.newZone) key.on("pointstart", function() {
-                        if (self.tripletNotesData[self.level][this.i][this.lane]) {
-                            self.notesCount[self.level]--;
-                            self.notesCountOfBar[self.level][Math.floor(this.i / 24)]--;
-                            if (self.tripletNotesData[self.level][this.i][this.lane] === ATTACK) {
-                                self.attackNotesCount[self.level]--;
-                                self.attackNotesCountOfBar[self.level][Math.floor(this.i / 24)]--;
-                            }
-                            self.tripletNotesData[self.level][this.i][this.lane] = NOTHING;
-                        } else {
-                            self.notesCount[self.level]++;
-                            self.notesCountOfBar[self.level][Math.floor(this.i / 24)]++;
-                            if (self.notetype === ATTACK) {
-                                self.attackNotesCountOfBar[self.level][Math.floor(this.i / 24)]++;
-                                self.attackNotesCount[self.level]++;
-                            }
-                            self.tripletNotesData[self.level][this.i][this.lane] = self.notetype;
-                        }
-                        this.fill = colorOf(self.tripletNotesData[self.level][this.i][this.lane]);
-                        self.updateNotesCount();
-                        self.save();
-                        self.notes.reset();
-                    }).$safe({i: i, lane: j}).setInteractive(true);
+                for (let j = 0; j < 4; j++) {
+                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: 15, fill: colorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                    self.tripletNoteButtons[i][j] = key;
+                    if (!this.newZone) key.on("pointstart", function(){ self.toggleTripletNoteAt(i, j) }.bind(self) ).setInteractive(true);
                 }
                 if (this.tripletNotesData[this.level][i].bind) {
                     Label({x: 130, text: "["}).on('pointstart', function() {
@@ -281,8 +247,8 @@ phina.define('MainScene', {
             baseline: "top",
             x: 10, y: 35
         }).addChildTo(this);
-        var BUTTONS_X = 860;
-        var notetype = Button({
+        const BUTTONS_X = 860;
+        const notetype = Button({
             text: "Normal Notes",
             fill: colorOf(NORMAL),
             fontSize: 20,
@@ -294,7 +260,7 @@ phina.define('MainScene', {
         }.bind(this)).addChildTo(this);
         Button({text: "Triplet", x: BUTTONS_X, y: 130}).on("pointstart", this.toggleTripletVisibility.bind(this)).addChildTo(this);
 
-        var editZones = Button({
+        const editZones = Button({
             text: "Edit Zones",
             fontSize: 20,
             x: BUTTONS_X, y: 210
@@ -355,8 +321,8 @@ phina.define('MainScene', {
                 this.visible = this.width - this.clipX > this.parent.cornerRadius;
             },
             onadded: function() {
-                var scene = this.getRoot();
-                var self = this;
+                const scene = this.getRoot();
+                const self = this;
                 this.buttons.each(function(button) {
                     button.on('pointstart', function() {
                         self.buttons.each(function(button) {
@@ -388,7 +354,7 @@ phina.define('MainScene', {
             }
         })({width: 160, height: 64}));
 
-        var updateDifficutly = function(level) {
+        const updateDifficulty = function(level) {
             this.level = level;
             this.fullUpdate();
             easyButton.fill = "#1abc9c";
@@ -396,16 +362,16 @@ phina.define('MainScene', {
             hardButton.fill = "#c0392b";
         }.bind(this);
 
-        var easyButton = Button({text: "Easy", fill: "#1abc9c"}).setPosition(BUTTONS_X, 290).on("pointstart", function() {
-            updateDifficutly("easy");
+        const easyButton = Button({text: "Easy", fill: "#1abc9c"}).setPosition(BUTTONS_X, 290).on("pointstart", function() {
+            updateDifficulty("easy");
             this.fill = "#18997a";
         }).addChildTo(this);
-        var normalButton = Button({text: "Normal", fill: "#cea20a"}).setPosition(BUTTONS_X, 370).on("pointstart", function() {
-            updateDifficutly("normal");
+        const normalButton = Button({text: "Normal", fill: "#cea20a"}).setPosition(BUTTONS_X, 370).on("pointstart", function() {
+            updateDifficulty("normal");
             this.fill = "#cea20a";
         }).addChildTo(this)
-        var hardButton = Button({text: "Hard", fill: "#c0392b"}).setPosition(BUTTONS_X, 450).on("pointstart", function() {
-            updateDifficutly("hard");
+        const hardButton = Button({text: "Hard", fill: "#c0392b"}).setPosition(BUTTONS_X, 450).on("pointstart", function() {
+            updateDifficulty("hard");
             this.fill = "#a43220";
         }).addChildTo(this);
 
@@ -413,8 +379,8 @@ phina.define('MainScene', {
             this.app.pushScene(LoadMenuScene(this));
         }.bind(this)).addChildTo(this);
 
-        var importFile = function(file) {
-            var fileReader = new FileReader();
+        const importFile = function(file) {
+            const fileReader = new FileReader();
             fileReader.onload = function(event) {
                 this.import(JSON.parse(event.target.result));
                 this.id = undefined;
@@ -443,21 +409,21 @@ phina.define('MainScene', {
         });
 
         document.getElementById("export").addEventListener("click", function() {
-            var json = this.export();
+            const json = this.export();
             console.time("copy");
-            var temp = document.createElement('textarea');
+            const temp = document.createElement('textarea');
 
             temp.value = json;
             temp.selectionStart = 0;
             temp.selectionEnd = temp.value.length;
 
-            var s = temp.style;
+            const s = temp.style;
             s.position = 'fixed';
             s.left = '-100%';
 
             document.body.appendChild(temp);
             temp.focus();
-            var result = document.execCommand('copy');
+            const result = document.execCommand('copy');
             temp.blur();
             document.body.removeChild(temp);
             console.timeEnd("copy");
@@ -467,9 +433,9 @@ phina.define('MainScene', {
         this.initShortcutKey();
     },
     save: function() {
-        var saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
         this.export();
-        var save = {changed: Date.now(), json: this.json};
+        const save = {changed: Date.now(), json: this.json};
         if (this.id !== undefined) {
             saves[this.id] = save;
         } else {
@@ -485,7 +451,7 @@ phina.define('MainScene', {
     updateDencityGraph: function() {
         while (this.dencitygraph.children.length > this.notesCountOfBar[this.level].length) this.dencitygraph.children.last.remove();
         while (this.dencitygraph.children.length < this.notesCountOfBar[this.level].length) {
-            var group = DisplayElement({y: -this.dencitygraph.children.length * 8}).addChildTo(this.dencitygraph);
+            const group = DisplayElement({y: -this.dencitygraph.children.length * 8}).addChildTo(this.dencitygraph);
             group.normal = RectangleShape({
                 height: 6,
                 stroke: null
@@ -496,14 +462,14 @@ phina.define('MainScene', {
                 stroke: null
             }).setOrigin(0, 0.5).addChildTo(group);
         }
-        for(var i = 0; i < this.dencitygraph.children.length; i++) {
+        for(let i = 0; i < this.dencitygraph.children.length; i++) {
             this.dencitygraph.children[i].normal.width = this.notesCountOfBar[this.level][i] * this.json.bpm / 90;
             this.dencitygraph.children[i].attack.width = this.attackNotesCountOfBar[this.level][i] * this.json.bpm / 90;
         }
     },
     updateGraphY: function() {
         // 60 = 30 * 16 / 8
-        var a = Math.min((this.height - 122) * 60 / (-this.notes.pitch.y * this.lengths[this.level].totaltime - this.height), 1);
+        const a = Math.min((this.height - 122) * 60 / (-this.notes.pitch.y * this.lengths[this.level].totaltime - this.height), 1);
         this.currentPos.y = -this.score.y / 60 * a + 2;
         this.dencitygraph.y = this.score.y / 60 * (1 - a) - 9;
     },
@@ -519,7 +485,7 @@ phina.define('MainScene', {
             }.bind(this)).play();
         }
         this.s.reset();
-        for (var i = this.notesCountOfBar[this.level].length; i < Math.ceil(this.lengths[this.level].totaltime / 16); i++) {
+        for (let i = this.notesCountOfBar[this.level].length; i < Math.ceil(this.lengths[this.level].totaltime / 16); i++) {
             this.notesCountOfBar[this.level][i] = 0;
             this.attackNotesCountOfBar[this.level][i] = 0;
         }
@@ -564,7 +530,7 @@ phina.define('MainScene', {
             return ch === "1" || ch === "2" || ch === "3" || ch === "4" || ch === "5" || ch === "6" || ch === "7" || ch === "8" || ch === "a" || ch === "b" || ch === "c" || ch === "d" || ch === "e" || ch === "f" || ch === "g" || ch === "h" || ch === "[" || ch === "]" || ch === "{" || ch === "}";
         }
 
-        var increment = function(key, ii, type) {
+        const increment = function(key, ii, type) {
             if (type === START || type === END) return;
             this.notesCount[key]++;
             if (!this.notesCountOfBar[key][Math.floor(ii / 16)]) this.notesCountOfBar[key][Math.floor(ii / 16)] = 0;
@@ -594,7 +560,7 @@ phina.define('MainScene', {
                     this.notesData[key][ii].bind = NOTHING;
                     this.notesData[key][ii].random = NOTHING;
                     if (value[i][j].includes("(") || nextTriplet >= 0) {
-                        var nowTriplet = Math.max(nextTriplet, 0);
+                        const nowTriplet = Math.max(nextTriplet, 0);
                         nextTriplet = -1;
                         for (var k = 0;; k++) { // )か小節区切りまでループ
                             var ik = ij / 2 + k;
@@ -605,19 +571,19 @@ phina.define('MainScene', {
                                 nextTriplet = k % 3;
                                 break;
                             }
-                            var tripletEnd = false;
-                            for(var l = 0; l < value[i][j].length; l++) {
-                                var ch = value[i][j].charAt(l);
+                            let tripletEnd = false;
+                            for(let l = 0; l < value[i][j].length; l++) {
+                                const ch = value[i][j].charAt(l);
                                 if (ch === ")") tripletEnd = true;
                                 else if (ch === "(") tripletEnd = false;
                             }
                             if (tripletEnd && (k + nowTriplet) % 3 === 0) {
                                 j--; // 三連符が8分のタイミングで終わる時は通常の8分にする
                                 break;
-                            } else for(l = 0; l < value[i][j].length; l++) {
-                                var ch = value[i][j].charAt(l);
+                            } else for(let l = 0; l < value[i][j].length; l++) {
+                                const ch = value[i][j].charAt(l);
                                 if(isVaild(ch) && this.tripletNotesData[key][ik][laneOf(ch)] === NOTHING) {
-                                    var type = dataOf(ch);
+                                    const type = dataOf(ch);
                                     increment(key, ii, type);
                                     this.tripletNotesData[key][ik][laneOf(ch)] = type;
                                 }
@@ -635,10 +601,10 @@ phina.define('MainScene', {
                         ij += k * 2;
                         ii = Math.round(ii);
                     } else {
-                        for(var k = 0; k < value[i][j].length; k++) {
-                            var ch = value[i][j].charAt(k);
+                        for(let k = 0; k < value[i][j].length; k++) {
+                            const ch = value[i][j].charAt(k);
                             if(isVaild(ch) && this.notesData[key][ii][laneOf(ch)] === NOTHING) {
-                                var type = dataOf(ch);
+                                const type = dataOf(ch);
                                 increment(key, ii, type);
                                 this.notesData[key][ii][laneOf(ch)] = type;
                             }
@@ -652,7 +618,7 @@ phina.define('MainScene', {
             }
             for (;i < 5; i++) this.lengths[key].push(16);
             this.barsCount[key] = Math.max(i, 5);
-            for(i = 0; i < Math.max(this.notesCountOfBar[key].length, 5); i++) {
+            for(let i = 0; i < Math.max(this.notesCountOfBar[key].length, 5); i++) {
                 if(!this.notesCountOfBar[key][i]) this.notesCountOfBar[key][i] = 0;
                 if(!this.attackNotesCountOfBar[key][i]) this.attackNotesCountOfBar[key][i] = 0;
             }
@@ -675,12 +641,12 @@ phina.define('MainScene', {
         console.time("export");
         ["easy", "normal", "hard"].each(function(level) {
             this.json.map[level] = [];
-            var putrightparenthese = false;
-            for (var i = 0; i < this.barsCount[level]; i++) {
-                var data = "";
-                var o = i === 0 ? 0 : this.lengths[level].sum[i - 1];
+            let putrightparenthese = false;
+            for (let i = 0; i < this.barsCount[level]; i++) {
+                let data = "";
+                const o = i === 0 ? 0 : this.lengths[level].sum[i - 1];
                 t:
-                for (var j = o; j < o + this.lengths[level].diff[i]; j++, data += ",") {
+                for (let j = o; j < o + this.lengths[level].diff[i]; j++, data += ",") {
                     if(putrightparenthese) {
                         data += ")";
                         putrightparenthese = false;
@@ -698,7 +664,7 @@ phina.define('MainScene', {
                         }, this)) continue;
                         // なければ3連符を配置
                         data += "("
-                        for(var k = 0;; k++) {
+                        for(let k = 0;; k++) {
                             if (this.tripletNotesData[level][j * 3 / 2 + k]) LANES.each(function (lane) {
                                 data += codeOf(this.tripletNotesData[level][j * 3 / 2 + k][lane], lane);
                             }, this);
@@ -720,7 +686,7 @@ phina.define('MainScene', {
             }
         }, this);
 
-        var json = JSON.stringify(this.json, null, " ");
+        const json = JSON.stringify(this.json, null, " ");
 
         console.timeEnd("export");
 
@@ -731,24 +697,63 @@ phina.define('MainScene', {
             this.toggleTripletVisibility.bind(this)();
         }.bind(this));
 
-        shortcut.add("1", function() {
-            console.log(this.level);
-            console.log(this.notesData);
-            if(this.notesData[this.level][0][0] != this.notetype){
-                this.notesData[this.level][0][0] = this.notetype;
-            }else{
-                this.notesData[this.level][0][0] = NOTHING;
-            }
-        }.bind(this));
-
-        console.log(this.notesData);
-        setInterval(function(){
-            console.log(this.notesData);
-        }.bind(this), 1000);
+        // setInterval(function(){
+        //     console.log(this.notesData);
+        //     console.log(this.newZone);
+        // }.bind(this), 1000);
     },
     toggleTripletVisibility: function() {
         this.tripletNotes.visible = !this.tripletNotes.visible;
         this.notes.x = this.tripletNotes.visible ? -120 : 0;
+    },
+    toggleNoteAt: function(i, lane) {
+        console.log(this.level);
+        console.log(i + " " + lane);
+        if (this.notesData[this.level][i][lane]) {
+            this.notesCount[this.level]--;
+            this.notesCountOfBar[this.level][Math.floor(i / 16)]--;
+            if (this.notesData[this.level][i][lane] === ATTACK) {
+                this.attackNotesCount[this.level]--;
+                this.attackNotesCountOfBar[this.level][Math.floor(i / 16)]--;
+            }
+            this.notesData[this.level][i][lane] = NOTHING;
+        } else {
+            this.notesCount[this.level]++;
+            this.notesCountOfBar[this.level][Math.floor(i / 16)]++;
+            if (this.notetype === ATTACK) {
+                this.attackNotesCount[this.level]++;
+                this.attackNotesCountOfBar[this.level][Math.floor(i / 16)]++;
+            }
+            this.notesData[this.level][i][lane] = this.notetype;
+        }
+        this.noteButtons[i][lane].fill = colorOf(this.notesData[this.level][i][lane]);
+        this.updateNotesCount();
+        this.save();
+        this.tripletNotes.reset();
+    },
+    toggleTripletNoteAt: function(i, lane) {
+            if (this.tripletNotesData[this.level][i][lane]) {
+                this.notesCount[this.level]--;
+                this.notesCountOfBar[this.level][Math.floor(i / 24)]--;
+                if (self.tripletNotesData[this.level][i][lane] === ATTACK) {
+                    this.attackNotesCount[this.level]--;
+                    this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]--;
+                }
+                this.tripletNotesData[this.level][i][lane] = NOTHING;
+            } else {
+                this.notesCount[this.level]++;
+                this.notesCountOfBar[this.level][Math.floor(i / 24)]++;
+                if (this.notetype === ATTACK) {
+                    this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]++;
+                    this.attackNotesCount[this.level]++;
+                }
+                this.tripletNotesData[this.level][i][lane] = this.notetype;
+            }
+            console.log(i, lane);
+            this.tripletNoteButtons[i][lane].fill = colorOf(this.tripletNotesData[this.level][i][lane]);
+            this.updateNotesCount();
+            this.save();
+            this.notes.reset();
     }
 });
 
@@ -786,7 +791,7 @@ phina.define("Lengths", {
 });
 
 phina.main(function() {
-    var app = GameApp({
+    const app = GameApp({
         width: SCREEN_WIDTH,
         height: innerHeight,
         startLabel: "main",
@@ -798,7 +803,7 @@ phina.main(function() {
     app.domElement.style["margin-left"] = "auto";
     app.domElement.style["margin-right"] = "auto";
 
-    var fitFunc = function() {
+    const fitFunc = function() {
         app.height = innerHeight;
         app.canvas.setSize(app.canvas.width, app.height);
         app.gridY.width = app.height;
