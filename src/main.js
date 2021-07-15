@@ -468,7 +468,7 @@ phina.define('MainScene', {
             fontFamily: "Nova Mono",
             align: "left",
             baseline: "top",
-            x: 10, y: 120
+            x: 10, y: 94
         }).addChildTo(this);
 
         shortcut.add("Left", function() {
@@ -493,18 +493,33 @@ phina.define('MainScene', {
             text: "Lorem Ipsum",
             fontSize: 22,
             fontFamily: "Nova Mono",
-            align: "left",
-            baseline: "top",
-            x: 10, y: 20
-        }).addChildTo(this);
+            padding: 0,
+            x: 10, y: 10,
+            fill: "black"
+        }).setOrigin(0, 0).on("pointstart", function() {
+            const ret = prompt("曲タイトルを入力してください。", this.json.title);
+            if(ret){
+                this.json.title = ret;
+                this.titleLabel.text = ret;
+            }
+        }.bind(this)).setInteractive(true).addChildTo(this);
+        this.titleLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
+
         this.artistLabel = Label({
             text: "by Dolor",
             fontSize: 22,
             fontFamily: "Nova Mono",
-            align: "left",
-            baseline: "top",
-            x: 25, y: 50
-        }).addChildTo(this);
+            padding: 0,
+            x: 30, y: 38,
+            fill: "black"
+        }).setOrigin(0, 0).on("pointstart", function() {
+            const ret = prompt("アーティスト名を入力してください。", this.json.artist);
+            if(ret){
+                this.json.artist = ret;
+                this.artistLabel.text = "by " + ret;
+            }
+        }.bind(this)).setInteractive(true).addChildTo(this);
+        this.artistLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
         this.initShortcutKey();
 
