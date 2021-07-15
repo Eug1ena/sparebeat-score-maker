@@ -48,7 +48,7 @@ phina.define('MainScene', {
         this.json = {
             title: "Lorem Ipsum",
             artist: "Dolor",
-            bpm: 180,
+            bpm: 158,
             startTime: 80,
             level: {
                 easy: 4,
@@ -454,12 +454,12 @@ phina.define('MainScene', {
             fontFamily: "Nova Mono",
             align: "left",
             baseline: "top",
-            x: 10, y: 94
+            x: 10, y: 150
         }).addChildTo(this);
 
         shortcut.add("Left", function() {
-            if (this.noteMeasure == 1) this.noteMeasure = 2;
-            else if (this.noteMeasure == 2) this.noteMeasure = 4;
+            if (this.noteMeasure === 1) this.noteMeasure = 2;
+            else if (this.noteMeasure === 2) this.noteMeasure = 4;
 
             this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
             this.currentLine.y = -15 - this.currentLinePos * 30;
@@ -468,8 +468,8 @@ phina.define('MainScene', {
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
         shortcut.add("Right", function() {
-            if (this.noteMeasure == 4) this.noteMeasure = 2;
-            else if (this.noteMeasure == 2) this.noteMeasure = 1;
+            if (this.noteMeasure === 4) this.noteMeasure = 2;
+            else if (this.noteMeasure === 2) this.noteMeasure = 1;
 
             this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
@@ -506,6 +506,27 @@ phina.define('MainScene', {
             }
         }.bind(this)).setInteractive(true).addChildTo(this);
         this.artistLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
+
+        this.bpmLabel = Label({
+            text: "BPM 158",
+            fontSize: 22,
+            fontFamily: "Nova Mono",
+            padding: 0,
+            x: 10, y: 80,
+            fill: "black"
+        }).setOrigin(0, 0).on("pointstart", function() {
+            const ret = prompt("BPMを入力してください。", this.json.bpm);
+            if(ret){
+                const bpm = parseFloat(ret);
+                if(bpm){
+                    this.json.bpm = bpm;
+                    this.bpmLabel.text = "BPM " + bpm;
+                }else{
+                    alert("無効な数値です。");
+                }
+            }
+        }.bind(this)).setInteractive(true).addChildTo(this);
+        this.bpmLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
         this.initShortcutKey();
 
