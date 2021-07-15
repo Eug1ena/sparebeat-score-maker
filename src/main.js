@@ -297,30 +297,16 @@ phina.define('MainScene', {
                         text: "[",
                         fontSize: 20,
                         cornerRadius: 0,
-                        width: 40,
-                        x: -60
+                        width: 80,
+                        x: -40
                     }).addChildTo(this).$safe({lane: "bind", type: START}),
-                    Button({
-                        text: "{",
-                        fontSize: 20,
-                        cornerRadius: 0,
-                        width: 40,
-                        x: -20
-                    }).addChildTo(this).$safe({lane: "random", type: START}),
                     Button({
                         text: "]",
                         fontSize: 20,
                         cornerRadius: 0,
-                        width: 40,
-                        x: 20
+                        width: 80,
+                        x: 40
                     }).addChildTo(this).$safe({lane: "bind", type: END}),
-                    Button({
-                        text: "}",
-                        fontSize: 20,
-                        cornerRadius: 0,
-                        width: 40,
-                        x: 60
-                    }).addChildTo(this).$safe({lane: "random", type: END})
                 ];
                 this.cancel = Button({
                     text: "Cancel",
