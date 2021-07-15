@@ -149,8 +149,16 @@ phina.define("Music", {
         this.songElement.play();
     },
     // 時間はミリ秒で指定
-    setPlayTime: function(time) {
-        this.songElement.src = "songs/" + this.songName + "#t=" + (time / 1000);
+    playAt: function(time) {
+        this.songElement.currentTime = time / 1000;
+        this.songElement.play();
+    },
+    stop: function() {
+        this.songElement.pause();
+        this.songElement.currentTime = 0;
+    },
+    isPlaying: function() {
+        return !this.songElement.paused;
     }
 
 });

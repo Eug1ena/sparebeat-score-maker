@@ -483,7 +483,7 @@ phina.define('MainScene', {
             x: 10, y: 10,
             fill: "black"
         }).setOrigin(0, 0).on("pointstart", function() {
-            const ret = prompt("曲タイトルを入力してください。", this.json.title);
+            const ret = prompt("曲のタイトルを入力してください。", this.json.title);
             if(ret){
                 this.json.title = ret;
                 this.titleLabel.text = ret;
@@ -780,15 +780,14 @@ phina.define('MainScene', {
                 this.changeNoteType();
             }.bind(this));
 
-            // this.music = Music("Clotho.ogg");
-            // shortcut.add("L", function() {
-            //     this.music.setPlayTime(1500);
-            //     this.music.play();
-            // }.bind(this));
-
-
-
-
+            this.music = Music("Shining Star.mp3");
+            shortcut.add("L", function() {
+                if(this.music.isPlaying()){
+                    this.music.stop();
+                }else{
+                    this.music.play();
+                }
+            }.bind(this));
 
             shortcut.add("1", function() {
                 this.toggleNoteAt(this.currentLinePos, 0);
