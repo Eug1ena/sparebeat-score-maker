@@ -138,3 +138,19 @@ phina.app.Object2D.prototype.getter('globalPosition', function() {
     // this._worldMatrix.clone().multiplyVector2(Vector2(0, 0))
     return phina.geom.Vector2(this._worldMatrix.m02, this._worldMatrix.m12);
 });
+
+phina.define("Music", {
+    init: function(filename) {
+        this.songName = filename;
+        this.songElement = document.createElement("audio");
+        this.songElement.src = "songs/" + this.songName;
+    },
+    play: function(time) {
+        this.songElement.play();
+    },
+    // 時間はミリ秒で指定
+    setPlayTime: function(time) {
+        this.songElement.src = "songs/" + this.songName + "#t=" + (time / 1000);
+    }
+
+});

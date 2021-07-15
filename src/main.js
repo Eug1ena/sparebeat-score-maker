@@ -17,7 +17,7 @@ phina.ui.Button.defaults.$extend({
     fontSize: 24
 });
 
-const MEASURE_COUNT_INITIAL = 100;
+const MEASURE_COUNT_INITIAL = 3;
 
 const NOTHING = 0;
 const NORMAL = 1;
@@ -92,18 +92,19 @@ phina.define('MainScene', {
             stroke: null
         }).addChildTo(this.screenBottom).setOrigin(0.5, 1);
         this.currentPos.alpha = 0.3;
-        this.extend = Button({x: -320, y: -2360, text: "+", width: 48, height: 48}).on("pointstart", function() {
+        this.extend = Button({x: -320, y: 40 - MEASURE_COUNT_INITIAL * 480, text: "+", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]++;
             if (this.lengths[this.level].length < this.barsCount[this.level]) this.lengths[this.level].push(16);
             this.updateTime();
             this.save();
         }.bind(this)).addChildTo(this.score);
-        this.cut = Button({x: -320, y: -1880, text: "-", width: 48, height: 48}).on("pointstart", function() {
+        this.cut = Button({x: -320, y: 520 - MEASURE_COUNT_INITIAL * 480, text: "-", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]--;
             this.lengths[this.level].cut();
             this.updateTime();
             this.save();
         }.bind(this)).addChildTo(this.score);
+
         this.s = InfiniteOf(function(i) {
             if (this.lengths[this.level].sum.includes(i) || i === 0) {
                 const group = DisplayElement();
@@ -123,6 +124,7 @@ phina.define('MainScene', {
             }
             return Element();
         }.bind(this), Vector2(0, -30)).addChildTo(this.score);
+
         this.notes = InfiniteOf(function(i) {
             if (!this.notesData[this.level][i]) {
                 this.notesData[this.level][i] = [NOTHING, NOTHING, NOTHING, NOTHING];
@@ -191,6 +193,7 @@ phina.define('MainScene', {
             }
             return root;
         }.bind(this), Vector2(0, this.s.pitch.y)).addChildTo(this.score);
+
         this.tripletNotes = InfiniteOf(function(i) {
             if (!this.tripletNotesData[this.level][i]) {
                 this.tripletNotesData[this.level][i] = [NOTHING, NOTHING, NOTHING, NOTHING];
@@ -241,6 +244,7 @@ phina.define('MainScene', {
             }
             return root;
         }.bind(this), Vector2(0, this.s.pitch.y / 3 * 2), {x: 120}).hide().addChildTo(this.score);
+
         this.notesCountLabel = Label({
             text: "0 Notes\n0 Attack Notes\n0.00 Notes Per Second",
             fontSize: 22,
@@ -427,6 +431,18 @@ phina.define('MainScene', {
             console.timeEnd("copy");
             if (!result) console.error("export failed!");
         }.bind(this));
+
+        this.currentLine = RectangleShape({
+            width: 300,
+            height: 7,
+            x: 0,
+            y: -15,
+            fill: "grey",
+            stroke: null
+        }).addChildTo(this.score);
+        this.currentLine.alpha = 0.6;
+
+        this.currentLinePos = 0;
 
         this.initShortcutKey();
     },
@@ -699,10 +715,30 @@ phina.define('MainScene', {
                 this.changeNoteType();
             }.bind(this));
 
+            // this.music = Music("Clotho.ogg");
+            // shortcut.add("L", function() {
+            //     this.music.setPlayTime(1500);
+            //     this.music.play();
+            // }.bind(this));
+
+            shortcut.add("Up", function() {
+                this.currentLinePos++;
+                this.currentLine.y -= 30;
+            }.bind(this));
+
+            shortcut.add("Down", function() {
+                if (this.currentLinePos > 0) {
+                    this.currentLinePos--;
+                    this.currentLine.y += 30;
+                }
+            }.bind(this));
+
         // setInterval(function(){
         //     console.log(this.notesData);
         //     console.log(this.newZone);
         // }.bind(this), 1000);
+
+
     },
     toggleTripletVisibility: function() {
         this.tripletNotes.visible = !this.tripletNotes.visible;
