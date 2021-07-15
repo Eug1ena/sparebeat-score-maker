@@ -806,7 +806,7 @@ phina.define('MainScene', {
                 if(this.music.isPlaying()){
                     this.music.stop();
                 }else{
-                    this.music.play();
+                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * this.currentLinePos);
                 }
             }.bind(this));
 
