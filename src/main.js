@@ -432,6 +432,7 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
+        this.currentLinePos = 0;
         this.currentLine = RectangleShape({
             width: 300,
             height: 7,
@@ -442,7 +443,42 @@ phina.define('MainScene', {
         }).addChildTo(this.score);
         this.currentLine.alpha = 0.6;
 
-        this.currentLinePos = 0;
+        shortcut.add("Up", function() {
+            this.currentLinePos += this.noteMeasure;
+            this.currentLine.y = -15 - this.currentLinePos * 30;
+        }.bind(this));
+        shortcut.add("Down", function() {
+            if (this.currentLinePos >= this.noteMeasure) {
+                this.currentLinePos -= this.noteMeasure;
+                this.currentLine.y = -15 - this.currentLinePos * 30;
+            }
+        }.bind(this));
+
+        this.noteMeasure = 4;
+        this.noteMeasureLabel = Label({
+            text: "4th Note",
+            fontSize: 22,
+            fontFamily: "Nova Mono",
+            align: "left",
+            baseline: "top",
+            x: 10, y: 120
+        }).addChildTo(this);
+
+        shortcut.add("Left", function() {
+            if (this.noteMeasure == 1) this.noteMeasure = 2;
+            else if (this.noteMeasure == 2) this.noteMeasure = 4;
+
+            this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+            this.currentLine.y = -15 - this.currentLinePos * 30;
+
+            this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+        }.bind(this));
+        shortcut.add("Right", function() {
+            if (this.noteMeasure == 4) this.noteMeasure = 2;
+            else if (this.noteMeasure == 2) this.noteMeasure = 1;
+
+            this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+        }.bind(this));
 
         this.initShortcutKey();
     },
@@ -706,6 +742,7 @@ phina.define('MainScene', {
 
         return json;
     },
+
     initShortcutKey: function() {
             shortcut.add("T", function() {
                 this.toggleTripletVisibility.bind(this)();
@@ -721,16 +758,9 @@ phina.define('MainScene', {
             //     this.music.play();
             // }.bind(this));
 
-            shortcut.add("Up", function() {
-                this.currentLinePos += 4;
-                this.currentLine.y -= 120;
-            }.bind(this));
-            shortcut.add("Down", function() {
-                if (this.currentLinePos >= 4) {
-                    this.currentLinePos -= 4;
-                    this.currentLine.y += 120;
-                }
-            }.bind(this));
+
+
+
 
             shortcut.add("1", function() {
                 this.toggleNoteAt(this.currentLinePos, 0);
