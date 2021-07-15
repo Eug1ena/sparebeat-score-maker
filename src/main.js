@@ -17,6 +17,8 @@ phina.ui.Button.defaults.$extend({
     fontSize: 24
 });
 
+const MEASURE_COUNT_INITIAL = 100;
+
 const NOTHING = 0;
 const NORMAL = 1;
 const ATTACK = 2;
@@ -57,7 +59,7 @@ phina.define('MainScene', {
         };
 
         // 以下lengthsまで各難易度ごとのデータ
-        this.barsCount = { easy: 5, normal: 5, hard: 5}; // 小節数
+        this.barsCount = { easy: MEASURE_COUNT_INITIAL, normal: MEASURE_COUNT_INITIAL, hard: MEASURE_COUNT_INITIAL}; // 小節数
 
         // ここは列挙型のようなものに置き換えるべきなように思う
         this.notesData = { easy: [], normal: [], hard: []}; // 3連符でない部分の譜面を表す表
@@ -79,8 +81,8 @@ phina.define('MainScene', {
         this.dencitygraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
         Label({x: 68, y: -40, fontSize: 12, text: "10notes/s"}).addChildTo(this.screenBottom);
-        this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, 5)});
-        this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, 5)});
+        this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
+        this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
         this.currentPos = RectangleShape({
             width: 100,
             height: 10,
@@ -735,7 +737,7 @@ phina.define('MainScene', {
             if (this.tripletNotesData[this.level][i][lane]) {
                 this.notesCount[this.level]--;
                 this.notesCountOfBar[this.level][Math.floor(i / 24)]--;
-                if (self.tripletNotesData[this.level][i][lane] === ATTACK) {
+                if (this.tripletNotesData[this.level][i][lane] === ATTACK) {
                     this.attackNotesCount[this.level]--;
                     this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]--;
                 }
@@ -760,8 +762,13 @@ phina.define('MainScene', {
 // 各小節の長さを管理するクラス
 phina.define("Lengths", {
     init: function() {
-        this.diff = [16, 16, 16, 16, 16];
-        this.sum = [16, 32, 48, 64, 80];
+        let sum = 0;
+        this.diff = [];
+        this.sum = [];
+        for(let i = 0; i < MEASURE_COUNT_INITIAL; i++){
+            this.diff.push(16);
+            this.sum.push(16 * i + 16);
+        }
     },
     push: function(x) {
         this.diff.push(x);
