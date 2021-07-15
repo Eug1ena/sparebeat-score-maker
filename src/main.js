@@ -250,16 +250,12 @@ phina.define('MainScene', {
             x: 10, y: 35
         }).addChildTo(this);
         const BUTTONS_X = 860;
-        const notetype = Button({
+        this.noteTypeButton = Button({
             text: "Normal Notes",
             fill: colorOf(NORMAL),
             fontSize: 20,
             x: BUTTONS_X, y: 50
-        }).on("pointstart", function() {
-            if (++this.notetype > LONG_END) this.notetype = NORMAL;
-            notetype.text = ["Normal Notes", "Attack Notes", "Long-Start", "Long-end"][this.notetype - 1];
-            notetype.fill = colorOf(this.notetype);
-        }.bind(this)).addChildTo(this);
+        }).on("pointstart", this.changeNoteType.bind(this)).addChildTo(this);
         Button({text: "Triplet", x: BUTTONS_X, y: 130}).on("pointstart", this.toggleTripletVisibility.bind(this)).addChildTo(this);
 
         const editZones = Button({
@@ -695,9 +691,13 @@ phina.define('MainScene', {
         return json;
     },
     initShortcutKey: function() {
-        shortcut.add("T", function() {
-            this.toggleTripletVisibility.bind(this)();
-        }.bind(this));
+            shortcut.add("T", function() {
+                this.toggleTripletVisibility.bind(this)();
+            }.bind(this));
+
+            shortcut.add("M", function() {
+                this.changeNoteType();
+            }.bind(this));
 
         // setInterval(function(){
         //     console.log(this.notesData);
@@ -756,6 +756,11 @@ phina.define('MainScene', {
             this.updateNotesCount();
             this.save();
             this.notes.reset();
+    },
+    changeNoteType: function() {
+        if (++this.notetype > LONG_END) this.notetype = NORMAL;
+        this.noteTypeButton.text = ["Normal Notes", "Attack Notes", "Long-Start", "Long-end"][this.notetype - 1];
+        this.noteTypeButton.fill = colorOf(this.notetype);
     }
 });
 
