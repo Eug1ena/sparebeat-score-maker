@@ -92,6 +92,7 @@ phina.define('MainScene', {
             stroke: null
         }).addChildTo(this.screenBottom).setOrigin(0.5, 1);
         this.currentPos.alpha = 0.3;
+
         this.extend = Button({x: -320, y: 40 - MEASURE_COUNT_INITIAL * 480, text: "+", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]++;
             if (this.lengths[this.level].length < this.barsCount[this.level]) this.lengths[this.level].push(16);
@@ -104,6 +105,17 @@ phina.define('MainScene', {
             this.updateTime();
             this.save();
         }.bind(this)).addChildTo(this.score);
+
+        this.currentLinePos = 0;
+        this.currentLine = RectangleShape({
+            width: 400,
+            height: 31,
+            x: 0,
+            y: -15,
+            fill: colorOf(NORMAL),
+            stroke: null
+        }).addChildTo(this.score);
+        this.currentLine.alpha = 0.15;
 
         this.s = InfiniteOf(function(i) {
             if (this.lengths[this.level].sum.includes(i) || i === 0) {
@@ -432,16 +444,6 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-        this.currentLinePos = 0;
-        this.currentLine = RectangleShape({
-            width: 300,
-            height: 7,
-            x: 0,
-            y: -15,
-            fill: "grey",
-            stroke: null
-        }).addChildTo(this.score);
-        this.currentLine.alpha = 0.6;
 
         shortcut.add("Up", function() {
             this.currentLinePos += this.noteMeasure;
@@ -472,12 +474,14 @@ phina.define('MainScene', {
             this.currentLine.y = -15 - this.currentLinePos * 30;
 
             this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+            this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
         shortcut.add("Right", function() {
             if (this.noteMeasure == 4) this.noteMeasure = 2;
             else if (this.noteMeasure == 2) this.noteMeasure = 1;
 
             this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+            this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
 
         this.initShortcutKey();
@@ -748,7 +752,7 @@ phina.define('MainScene', {
                 this.toggleTripletVisibility.bind(this)();
             }.bind(this));
 
-            shortcut.add("M", function() {
+            shortcut.add("R", function() {
                 this.changeNoteType();
             }.bind(this));
 
@@ -837,8 +841,10 @@ phina.define('MainScene', {
     },
     changeNoteType: function() {
         if (++this.notetype > LONG_END) this.notetype = NORMAL;
-        this.noteTypeButton.text = ["Normal Notes", "Attack Notes", "Long-Start", "Long-end"][this.notetype - 1];
+        this.noteTypeButton.text = ["Normal Notes", "Attack Notes", "Long-Start", "Long-End"][this.notetype - 1];
         this.noteTypeButton.fill = colorOf(this.notetype);
+
+        this.currentLine.fill = colorOf(this.notetype);
     }
 });
 
