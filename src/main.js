@@ -722,15 +722,27 @@ phina.define('MainScene', {
             // }.bind(this));
 
             shortcut.add("Up", function() {
-                this.currentLinePos++;
-                this.currentLine.y -= 30;
+                this.currentLinePos += 4;
+                this.currentLine.y -= 120;
+            }.bind(this));
+            shortcut.add("Down", function() {
+                if (this.currentLinePos >= 4) {
+                    this.currentLinePos -= 4;
+                    this.currentLine.y += 120;
+                }
             }.bind(this));
 
-            shortcut.add("Down", function() {
-                if (this.currentLinePos > 0) {
-                    this.currentLinePos--;
-                    this.currentLine.y += 30;
-                }
+            shortcut.add("1", function() {
+                this.toggleNoteAt(this.currentLinePos, 0);
+            }.bind(this));
+            shortcut.add("2", function() {
+                this.toggleNoteAt(this.currentLinePos, 1);
+            }.bind(this));
+            shortcut.add("3", function() {
+                this.toggleNoteAt(this.currentLinePos, 2);
+            }.bind(this));
+            shortcut.add("4", function() {
+                this.toggleNoteAt(this.currentLinePos, 3);
             }.bind(this));
 
         // setInterval(function(){
