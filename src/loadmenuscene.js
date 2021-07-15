@@ -3,9 +3,9 @@ phina.define('LoadMenuScene', {
     init: function(main) {
         this.superInit();
         this.backgroundColor = "#4444";
-        var saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
         saves.sort(function(a, b) {return a.changed - b.changed;});
-        var group = List(true, 25, {x: 35, y: 25}).addChildTo(this);
+        const group = List(true, 25, {x: 35, y: 25}).addChildTo(this);
         saves.each(function(save, index) {
             SaveData(save).addChildTo(group).on('pointstart', function() {
                 if (this.childclicked) this.childclicked = false;
@@ -22,7 +22,7 @@ phina.define('LoadMenuScene', {
             }.bind(this));
         }, this);
         if (saves.length === 0) {
-            Label({x: SCREEN_CENTER_X, y: SCREEN_CENTER_Y, text: "データがありません", stroke: "#aaa", fill: "#222"}).addChildTo(this)
+            Label({x: SCREEN_CENTER_X, y: SCREEN_CENTER_Y, text: "データがありません", stroke: "#aaa", fill: "#222"}).addChildTo(this);
         }
         this.on("enter", function(e) {
             e.app.domElement.addEventListener('wheel', function(e) {
@@ -51,7 +51,7 @@ phina.define('SaveData', {
         Label({x: 10, y: 60, align: "left", fontSize: 16, text: "Level: " + save.json.level.easy + "/" + save.json.level.normal + "/" + save.json.level.hard}).addChildTo(this);
         Label({x: 10, y: 80, align: "left", fontSize: 16, text: "Last changed: " + new Date(save.changed).toLocaleString("japanese")}).addChildTo(this);
 
-        var deleteButton = Button({x: 840, y: 80, fill: "#422", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(this);
+        const deleteButton = Button({x: 840, y: 80, fill: "#422", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(this);
         deleteButton.on('pointstart', function() {
             this.childclicked = true;
             this.flare('delete');

@@ -17,7 +17,7 @@ phina.ui.Button.defaults.$extend({
     fontSize: 24
 });
 
-const MEASURE_COUNT_INITIAL = 3;
+const MEASURE_COUNT_INITIAL = 100;
 
 const NOTHING = 0;
 const NORMAL = 1;
@@ -46,9 +46,9 @@ phina.define('MainScene', {
         this.notetype = NORMAL;
         this.level = "normal";
         this.json = {
-            title: "",
-            artist: "",
-            bpm: 120,
+            title: "Lorem Ipsum",
+            artist: "Dolor",
+            bpm: 180,
             startTime: 80,
             level: {
                 easy: 4,
@@ -80,7 +80,7 @@ phina.define('MainScene', {
         this.dencitygraph = DisplayElement({y: -9}).addChildTo(this.screenBottom);
         this.dencitygraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
-        Label({x: 68, y: -40, fontSize: 12, text: "10notes/s"}).addChildTo(this.screenBottom);
+        // Label({x: 68, y: -40, fontSize: 12, text: "10notes/s"}).addChildTo(this.screenBottom);
         this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
         this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
         this.currentPos = RectangleShape({
@@ -259,13 +259,14 @@ phina.define('MainScene', {
 
         this.notesCountLabel = Label({
             text: "0 Notes\n0 Attack Notes\n0.00 Notes Per Second",
-            fontSize: 22,
+            fontSize: 18,
             fontFamily: "Nova Mono",
             align: "left",
             baseline: "top",
-            x: 10, y: 35
+            x: 60, y: 680
         }).addChildTo(this);
         const BUTTONS_X = 860;
+
         this.noteTypeButton = Button({
             text: "Normal Notes",
             fill: colorOf(NORMAL),
@@ -393,6 +394,10 @@ phina.define('MainScene', {
             this.app.pushScene(LoadMenuScene(this));
         }.bind(this)).addChildTo(this);
 
+        // Button({text: "Setting", fill: "grey"}).setPosition(BUTTONS_X, 610).on("pointstart", function() {
+        //     this.app.pushScene(MetaSettingScene(this.json));
+        // }.bind(this)).addChildTo(this);
+
         const importFile = function(file) {
             const fileReader = new FileReader();
             fileReader.onload = function(event) {
@@ -458,7 +463,7 @@ phina.define('MainScene', {
 
         this.noteMeasure = 4;
         this.noteMeasureLabel = Label({
-            text: "4th Note",
+            text: "Selected: 4th Note",
             fontSize: 22,
             fontFamily: "Nova Mono",
             align: "left",
@@ -473,18 +478,36 @@ phina.define('MainScene', {
             this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
             this.currentLine.y = -15 - this.currentLinePos * 30;
 
-            this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+            this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
         shortcut.add("Right", function() {
             if (this.noteMeasure == 4) this.noteMeasure = 2;
             else if (this.noteMeasure == 2) this.noteMeasure = 1;
 
-            this.noteMeasureLabel.text = ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
+            this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
 
+        this.titleLabel = Label({
+            text: "Lorem Ipsum",
+            fontSize: 22,
+            fontFamily: "Nova Mono",
+            align: "left",
+            baseline: "top",
+            x: 10, y: 20
+        }).addChildTo(this);
+        this.artistLabel = Label({
+            text: "by Dolor",
+            fontSize: 22,
+            fontFamily: "Nova Mono",
+            align: "left",
+            baseline: "top",
+            x: 25, y: 50
+        }).addChildTo(this);
+
         this.initShortcutKey();
+
     },
     save: function() {
         const saves = JSON.parse(localStorage.getItem('saves') || "[]");
