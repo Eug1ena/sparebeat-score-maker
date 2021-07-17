@@ -435,8 +435,8 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-        shortcut.add("Up", function() {
-            this.currentLinePos += this.noteMeasure;
+
+        const updateCurrentLine = function() {
             this.currentLine.y = -15 - this.currentLinePos * 30;
 
             if(this.score.position.y < -this.currentLine.y - this.height + 16){
@@ -444,18 +444,30 @@ phina.define('MainScene', {
             }else if(this.score.position.y > -this.currentLine.y - 16){
                 this.score.position.y = -this.currentLine.y - 16;
             }
+        }.bind(this);
+        shortcut.add("Up", function() {
+            if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1)){
+                this.currentLinePos += this.noteMeasure;
+            }
+            updateCurrentLine();
         }.bind(this));
         shortcut.add("Down", function() {
             if (this.currentLinePos >= this.noteMeasure) {
                 this.currentLinePos -= this.noteMeasure;
-                this.currentLine.y = -15 - this.currentLinePos * 30;
             }
-
-            if(this.score.position.y < -this.currentLine.y - this.height + 16){
-                this.score.position.y = -this.currentLine.y - this.height + 36;
-            }else if(this.score.position.y > -this.currentLine.y - 16){
-                this.score.position.y = -this.currentLine.y - 16;
+            updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Shift+Up", function() {
+            if(this.currentLinePos + 16 < this.lengths[this.level].sum.slice(-1)){
+                this.currentLinePos += 16;
             }
+            updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Shift+Down", function() {
+            if (this.currentLinePos >= 16) {
+                this.currentLinePos -= 16;
+            }
+            updateCurrentLine();
         }.bind(this));
 
         this.noteMeasure = 4;
@@ -816,7 +828,7 @@ phina.define('MainScene', {
                 if(this.music.isPlaying()){
                     this.music.stop();
                 }else{
-                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm /4 );
+                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * this.currentLinePos);
                 }
             }.bind(this));
 
@@ -845,8 +857,6 @@ phina.define('MainScene', {
         this.notes.x = this.tripletNotes.visible ? -120 : 0;
     },
     toggleNoteAt: function(i, lane) {
-        console.log(this.level);
-        console.log(i + " " + lane);
         if (this.notesData[this.level][i][lane]) {
             this.notesCount[this.level]--;
             this.notesCountOfBar[this.level][Math.floor(i / 16)]--;
