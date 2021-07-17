@@ -435,15 +435,26 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-
         shortcut.add("Up", function() {
             this.currentLinePos += this.noteMeasure;
             this.currentLine.y = -15 - this.currentLinePos * 30;
+
+            if(this.score.position.y < -this.currentLine.y - this.height + 16){
+                this.score.position.y = -this.currentLine.y - this.height + 16;
+            }else if(this.score.position.y > -this.currentLine.y - 16){
+                this.score.position.y = -this.currentLine.y - 16;
+            }
         }.bind(this));
         shortcut.add("Down", function() {
             if (this.currentLinePos >= this.noteMeasure) {
                 this.currentLinePos -= this.noteMeasure;
                 this.currentLine.y = -15 - this.currentLinePos * 30;
+            }
+
+            if(this.score.position.y < -this.currentLine.y - this.height + 16){
+                this.score.position.y = -this.currentLine.y - this.height + 36;
+            }else if(this.score.position.y > -this.currentLine.y - 16){
+                this.score.position.y = -this.currentLine.y - 16;
             }
         }.bind(this));
 
@@ -529,7 +540,6 @@ phina.define('MainScene', {
         this.bpmLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
         this.initShortcutKey();
-
     },
     save: function() {
         const saves = JSON.parse(localStorage.getItem('saves') || "[]");
@@ -806,7 +816,7 @@ phina.define('MainScene', {
                 if(this.music.isPlaying()){
                     this.music.stop();
                 }else{
-                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * this.currentLinePos);
+                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm /4 );
                 }
             }.bind(this));
 

@@ -8,4 +8,3 @@
 [Sparebeat](https://sparebeat.com/)の創作譜面支援ツールです。
 
 [axion014](https://github.com/axion014)さんが開発していたものを利用させていただいています。axion014さんのプロジェクトは[こちら](https://github.com/axion014/axion014.github.io)からどうぞ。
-
