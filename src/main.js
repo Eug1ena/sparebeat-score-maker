@@ -17,7 +17,7 @@ phina.ui.Button.defaults.$extend({
     fontSize: 24
 });
 
-const MEASURE_COUNT_INITIAL = 100;
+const BARS_COUNT_INITIAL = 100;
 
 const NOTHING = 0;
 const NORMAL = 1;
@@ -58,8 +58,24 @@ phina.define('MainScene', {
             map: {}
         };
 
+        this.NOTES_INTERVAL = 30;
+        shortcut.add("Ctrl+Shift+Up", function() {
+            if(this.NOTES_INTERVAL == 30) this.NOTES_INTERVAL = 35;
+            if(this.NOTES_INTERVAL == 25) this.NOTES_INTERVAL = 30;
+            if(this.NOTES_INTERVAL == 20) this.NOTES_INTERVAL = 25;
+
+            this.updateNotesInterval();
+        }.bind(this));
+        shortcut.add("Ctrl+Shift+Down", function() {
+            if(this.NOTES_INTERVAL == 25) this.NOTES_INTERVAL = 20;
+            if(this.NOTES_INTERVAL == 30) this.NOTES_INTERVAL = 25;
+            if(this.NOTES_INTERVAL == 35) this.NOTES_INTERVAL = 30;
+
+            this.updateNotesInterval();
+        }.bind(this));
+
         // 以下lengthsまで各難易度ごとのデータ
-        this.barsCount = { easy: MEASURE_COUNT_INITIAL, normal: MEASURE_COUNT_INITIAL, hard: MEASURE_COUNT_INITIAL}; // 小節数
+        this.barsCount = { easy: BARS_COUNT_INITIAL, normal: BARS_COUNT_INITIAL, hard: BARS_COUNT_INITIAL}; // 小節数
 
         // ここは列挙型のようなものに置き換えるべきなように思う
         this.notesData = { easy: [], normal: [], hard: []}; // 3連符でない部分の譜面を表す表
@@ -81,8 +97,8 @@ phina.define('MainScene', {
         this.dencitygraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
         // Label({x: 68, y: -40, fontSize: 12, text: "10notes/s"}).addChildTo(this.screenBottom);
-        this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
-        this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, MEASURE_COUNT_INITIAL)});
+        this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, BARS_COUNT_INITIAL)});
+        this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, BARS_COUNT_INITIAL)});
         this.currentPos = RectangleShape({
             width: 100,
             height: 10,
@@ -93,23 +109,23 @@ phina.define('MainScene', {
         }).addChildTo(this.screenBottom).setOrigin(0.5, 1);
         this.currentPos.alpha = 0.3;
 
-        this.extend = Button({x: -320, y: 40 - MEASURE_COUNT_INITIAL * 480, text: "+", width: 48, height: 48}).on("pointstart", function() {
+        this.extend = Button({x: -320, y: 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16, text: "+", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]++;
             if (this.lengths[this.level].length < this.barsCount[this.level]) this.lengths[this.level].push(16);
-            this.updateTime();
+            this.updateBarsCount();
             this.save();
         }.bind(this)).addChildTo(this.score);
-        this.cut = Button({x: -320, y: 520 - MEASURE_COUNT_INITIAL * 480, text: "-", width: 48, height: 48}).on("pointstart", function() {
+        this.cut = Button({x: -320, y: 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16, text: "-", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]--;
             this.lengths[this.level].cut();
-            this.updateTime();
+            this.updateBarsCount();
             this.save();
         }.bind(this)).addChildTo(this.score);
 
         this.currentLinePos = 0;
         this.currentLine = RectangleShape({
             width: 400,
-            height: 31,
+            height: this.NOTES_INTERVAL,
             x: 0,
             y: -15,
             fill: colorOf(NORMAL),
@@ -135,7 +151,7 @@ phina.define('MainScene', {
                 }
             }
             return Element();
-        }.bind(this), Vector2(0, -30)).addChildTo(this.score);
+        }.bind(this), Vector2(0, -this.NOTES_INTERVAL)).addChildTo(this.score);
 
         this.notes = InfiniteOf(function(i) {
             if (!this.notesData[this.level][i]) {
@@ -147,25 +163,24 @@ phina.define('MainScene', {
                 this.noteButtons[i] = [null, null, null, null];
             }
             const root = DisplayElement();
-            if (this.lengths[this.level].sum.includes(i + 1)) {
-                Button({x: -140, y: -8, text: "+", width: 36, height: 36}).on("pointstart", function() {
+            if (this.lengths[this.level].sum.includes(i)) {
+                Button({x: -140, y: 22, text: "+", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i + 1);
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] + 1);
                     this.notes.reset();
-                    this.updateTime();
+                    this.updateBarsCount();
                     this.save();
                 }.bind(this)).addChildTo(root);
-            }
-            if (this.lengths[this.level].sum.includes(i + 3)) {
-                Button({x: -140, y: -24, text: "-", width: 36, height: 36}).on("pointstart", function() {
+
+                Button({x: -140, y: 66, text: "-", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i + 3);
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 1);
                     this.notes.reset();
-                    this.updateTime();
+                    this.updateBarsCount();
                     this.save();
                 }.bind(this)).addChildTo(root);
             }
-            const group = DisplayElement({width: 225, height: 28, y: -15}).addChildTo(root);
+            const group = DisplayElement({width: 225, height: 28, y: -this.NOTES_INTERVAL / 2}).addChildTo(root);
             const self = this;
             if(LANES.some(function (lane) {
                 return this.tripletNotesData[this.level][Math.floor(i / 2) * 3] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2][lane] !== NOTHING;
@@ -184,7 +199,7 @@ phina.define('MainScene', {
                     }.bind(this)).setInteractive(true);
                 }
                 for (let j = 0; j < 4; j++) {
-                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: colorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL - 5, fill: colorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
                     self.noteButtons[i][j] = key;
                     if (!this.newZone) key.on("pointstart", function(){ self.toggleNoteAt(i, j); }.bind(self) ).setInteractive(true);
                 }
@@ -216,7 +231,7 @@ phina.define('MainScene', {
                 this.tripletNoteButtons[i] = [null, null, null, null];
             }
             const root = DisplayElement();
-            const group = DisplayElement({width: 225, height: 18, y: -10}).addChildTo(root);
+            const group = DisplayElement({width: 225, height: 18, y: -this.NOTES_INTERVAL / 3}).addChildTo(root);
             const self = this;
             if (LANES.some(function (lane) {
                 return this.notesData[this.level][Math.floor(i / 3) * 2] && this.notesData[this.level][Math.floor(i / 3) * 2][lane] !== NOTHING || this.notesData[this.level][Math.floor(i / 3) * 2 + 1] && this.notesData[this.level][Math.floor(i / 3) * 2 + 1][lane] !== NOTHING;
@@ -235,7 +250,7 @@ phina.define('MainScene', {
                     }.bind(this)).setInteractive(true);
                 }
                 for (let j = 0; j < 4; j++) {
-                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: 15, fill: colorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                    const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: colorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
                     self.tripletNoteButtons[i][j] = key;
                     if (!this.newZone) key.on("pointstart", function(){ self.toggleTripletNoteAt(i, j) }.bind(self) ).setInteractive(true);
                 }
@@ -400,7 +415,7 @@ phina.define('MainScene', {
         this.on("enter", function(e) {
             e.app.domElement.addEventListener('wheel', function(e) {
                 // e.deltaMode は 0なら1が1px、1なら1が1行であることを意味する
-                this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totaltime - this.height);
+                this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
                 this.updateGraphY();
             }.bind(this));
             e.app.domElement.addEventListener("dragover", function(event) {
@@ -435,14 +450,13 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-
         const updateCurrentLine = function() {
-            this.currentLine.y = -15 - this.currentLinePos * 30;
+            this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
 
-            if(this.score.position.y < -this.currentLine.y - this.height + 16){
-                this.score.position.y = -this.currentLine.y - this.height + 16;
-            }else if(this.score.position.y > -this.currentLine.y - 16){
-                this.score.position.y = -this.currentLine.y - 16;
+            if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
+                this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
+            }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
+                this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
             }
         }.bind(this);
         shortcut.add("Up", function() {
@@ -485,7 +499,7 @@ phina.define('MainScene', {
             else if (this.noteMeasure === 2) this.noteMeasure = 4;
 
             this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
-            this.currentLine.y = -15 - this.currentLinePos * 30;
+            this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
 
             this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
@@ -590,23 +604,23 @@ phina.define('MainScene', {
     },
     updateGraphY: function() {
         // 60 = 30 * 16 / 8
-        const a = Math.min((this.height - 122) * 60 / (-this.notes.pitch.y * this.lengths[this.level].totaltime - this.height), 1);
+        const a = Math.min((this.height - 122) * 60 / (-this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height), 1);
         this.currentPos.y = -this.score.y / 60 * a + 2;
         this.dencitygraph.y = this.score.y / 60 * (1 - a) - 9;
     },
-    updateTime: function(updategraph) {
-        this.extend.y = this.notes.pitch.y * this.lengths[this.level].totaltime + 40;
+    updateBarsCount: function(updategraph) {
+        this.extend.y = this.notes.pitch.y * this.lengths[this.level].totalBarsCount + 40;
         this.cut.y = this.extend.y - this.lengths[this.level].diff[this.lengths[this.level].length - 1] * this.notes.pitch.y;
-        if (this.score.y > -this.notes.pitch.y * this.lengths[this.level].totaltime) {
+        if (this.score.y > -this.notes.pitch.y * this.lengths[this.level].totalBarsCount) {
             this.notes.sleep();
             this.tripletNotes.sleep();
-            this.score.tweener.to({y: -this.notes.pitch.y * this.lengths[this.level].totaltime}, 500, "easeOutQuad").call(function() {
+            this.score.tweener.to({y: -this.notes.pitch.y * this.lengths[this.level].totalBarsCount}, 500, "easeOutQuad").call(function() {
                 this.notes.wakeUp();
                 this.tripletNotes.wakeUp();
             }.bind(this)).play();
         }
         this.s.reset();
-        for (let i = this.notesCountOfBar[this.level].length; i < Math.ceil(this.lengths[this.level].totaltime / 16); i++) {
+        for (let i = this.notesCountOfBar[this.level].length; i < Math.ceil(this.lengths[this.level].totalBarsCount / 16); i++) {
             this.notesCountOfBar[this.level][i] = 0;
             this.attackNotesCountOfBar[this.level][i] = 0;
         }
@@ -617,11 +631,25 @@ phina.define('MainScene', {
     },
     updateNotesCount: function() {
         // 4 / 60 = 1 / 15
-        this.notesCountLabel.text = this.notesCount[this.level] + " Notes\n" + this.attackNotesCount[this.level] + " Attack Notes\n" + (this.notesCount[this.level] * this.json.bpm / 15 / this.lengths[this.level].totaltime).toFixed(2) + " Notes Per Second";
+        this.notesCountLabel.text = this.notesCount[this.level] + " Notes\n" + this.attackNotesCount[this.level] + " Attack Notes\n" + (this.notesCount[this.level] * this.json.bpm / 15 / this.lengths[this.level].totalBarsCount).toFixed(2) + " Notes Per Second";
         this.updateDencityGraph();
     },
+    updateNotesInterval: function() {
+        this.extend.y = 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
+        this.cut.y = 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
+
+        this.currentLine.height = this.NOTES_INTERVAL;
+        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+
+        this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
+        this.s.reset();
+        this.notes.pitch = Vector2(0, this.s.pitch.y);
+        this.notes.reset();
+        this.tripletNotes.pitch = Vector2(0, this.s.pitch.y / 3 * 2);
+        this.tripletNotes.reset();
+    },
     fullUpdate: function() {
-        this.updateTime();
+        this.updateBarsCount();
         this.notes.reset();
         this.tripletNotes.reset();
     },
@@ -918,7 +946,7 @@ phina.define("Lengths", {
         let sum = 0;
         this.diff = [];
         this.sum = [];
-        for(let i = 0; i < MEASURE_COUNT_INITIAL; i++){
+        for(let i = 0; i < BARS_COUNT_INITIAL; i++){
             this.diff.push(16);
             this.sum.push(16 * i + 16);
         }
@@ -944,7 +972,7 @@ phina.define("Lengths", {
         length: {
             get: function() {return this.diff.length;},
         },
-        totaltime: {
+        totalBarsCount: {
             get: function() {return this.sum[this.length - 1];},
         }
     }
