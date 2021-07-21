@@ -943,13 +943,14 @@ phina.define('TitleScene', {
     init: function() {
         this.superInit();
 
-        this.titles = ["シャイニングスター"];
-        this.artists = ["魔王魂"];
+        // 各セーブデータのkeyは"json"(譜面データ)と"changed"
+        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        console.log(saves);
 
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
 
         this.chartElements = [];
-        for(let i = 0; i < this.titles.length; i++){
+        for(let i = 0; i < saves.length; i++){
             const elem = RectangleShape({
                 width: SCREEN_WIDTH,
                 height: 150,
@@ -962,12 +963,12 @@ phina.define('TitleScene', {
 
             Label({
                 x: 0, y: -20,
-                text: this.titles[i],
+                text: saves[i].json.title,
                 fontSize: 35
             }).addChildTo(elem);
             Label({
                 x: 0, y: 30,
-                text: "by " + this.artists[i],
+                text: "by " + saves[i].json.artist,
                 fontSize: 25
             }).addChildTo(elem);
         }
