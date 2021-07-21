@@ -943,14 +943,72 @@ phina.define('TitleScene', {
     init: function() {
         this.superInit();
 
+        this.titles = ["シャイニングスター"];
+        this.artists = ["魔王魂"];
+
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
-        Label({
-            x: 0, y: -200,
-            text: "タイトル画面",
-        }).addChildTo(this.center);
+
+        this.chartElements = [];
+        for(let i = 0; i < this.titles.length; i++){
+            const elem = RectangleShape({
+                width: SCREEN_WIDTH,
+                height: 150,
+                x: 0,
+                y: 200 * i,
+                fill: i === 0 ? "#ffb0e5" : "#ffd4f1",
+                stroke: null
+            }).addChildTo(this.center);
+            this.chartElements.push(elem);
+
+            Label({
+                x: 0, y: -20,
+                text: this.titles[i],
+                fontSize: 35
+            }).addChildTo(elem);
+            Label({
+                x: 0, y: 30,
+                text: "by " + this.artists[i],
+                fontSize: 25
+            }).addChildTo(elem);
+        }
+        this.selectedIndex = 0;
+
+        shortcut.add("Up", function() {
+            if(this.selectedIndex >= 1) {
+                this.chartElements[this.selectedIndex].fill = "#ffd4f1";
+                this.selectedIndex--;
+                this.chartElements[this.selectedIndex].fill = "#ffb0e5";
+
+                this.chartElements.forEach(function(v) {
+                    v.y += 200;
+                });
+            }
+        }.bind(this));
+        shortcut.add("Down", function() {
+            if(this.selectedIndex < this.chartElements.length - 1) {
+                this.chartElements[this.selectedIndex].fill = "#ffd4f1";
+                this.selectedIndex++;
+                this.chartElements[this.selectedIndex].fill = "#ffb0e5";
+
+                this.chartElements.forEach(function(v) {
+                    v.y -= 200;
+                });
+            }
+        }.bind(this));
+
+        shortcut.add("Space", function() {
+            alert(this.selectedIndex);
+            this.goToMainScene();
+        }.bind(this));
     },
     update: function() {
         this.center.y = this.height / 2;
+    },
+    goToMainScene: function() {
+        shortcut.remove("Up");
+        shortcut.remove("Down");
+        shortcut.remove("Space");
+        this.exit();
     }
 
 });
