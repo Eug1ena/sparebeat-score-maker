@@ -4,7 +4,6 @@ phina.define('LoadMenuScene', {
         this.superInit();
         this.backgroundColor = "#4444";
         const saves = JSON.parse(localStorage.getItem('saves') || "[]");
-        console.log(saves);
         saves.sort(function(a, b) {return a.changed - b.changed;});
         const group = List(true, 25, {x: 35, y: 25}).addChildTo(this);
         saves.each(function(save, index) {

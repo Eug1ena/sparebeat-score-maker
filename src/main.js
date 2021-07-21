@@ -58,7 +58,6 @@ phina.define('MainScene', {
             },
             map: {}
         };
-        console.log(this.id);
 
         this.NOTES_INTERVAL = 30;
         shortcut.add("Ctrl+Shift+Up", function() {
@@ -528,6 +527,7 @@ phina.define('MainScene', {
             if(ret){
                 this.json.title = ret;
                 this.titleLabel.text = ret;
+                this.save();
             }
         }.bind(this)).setInteractive(true).addChildTo(this);
         this.titleLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
@@ -544,6 +544,7 @@ phina.define('MainScene', {
             if(ret){
                 this.json.artist = ret;
                 this.artistLabel.text = "by " + ret;
+                this.save();
             }
         }.bind(this)).setInteractive(true).addChildTo(this);
         this.artistLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
@@ -562,6 +563,7 @@ phina.define('MainScene', {
                 if(bpm){
                     this.json.bpm = bpm;
                     this.bpmLabel.text = "BPM " + bpm;
+                    this.save();
                 }else{
                     alert("無効な数値です。");
                 }
@@ -570,6 +572,8 @@ phina.define('MainScene', {
         this.bpmLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
         this.initShortcutKey();
+
+        this.import(this.json);
     },
     save: function() {
         const saves = JSON.parse(localStorage.getItem('saves') || "[]");
@@ -770,12 +774,18 @@ phina.define('MainScene', {
                 this.lengths[key].push(Math.round(jj));
             }
             for (;i < 5; i++) this.lengths[key].push(16);
-            this.barsCount[key] = Math.max(i, 5);
-            for(let i = 0; i < Math.max(this.notesCountOfBar[key].length, 5); i++) {
+
+            this.barsCount[key] = Math.max(i, BARS_COUNT_INITIAL);
+            for(let i = 0; i < Math.max(this.notesCountOfBar[key].length, BARS_COUNT_INITIAL); i++) {
                 if(!this.notesCountOfBar[key][i]) this.notesCountOfBar[key][i] = 0;
                 if(!this.attackNotesCountOfBar[key][i]) this.attackNotesCountOfBar[key][i] = 0;
             }
         }, this);
+
+        this.titleLabel.text = this.json.title;
+        this.artistLabel.text = "by " + this.json.artist;
+        this.bpmLabel.text = "BPM " + this.json.bpm;
+
         console.timeEnd("import");
         this.fullUpdate();
     },
@@ -1002,6 +1012,9 @@ phina.define('TitleScene', {
         shortcut.add("Space", function() {
             this.goToMainScene(this.selectedIndex, saves[this.selectedIndex].json);
         }.bind(this));
+        shortcut.add("Enter", function() {
+            this.goToMainScene(this.selectedIndex, saves[this.selectedIndex].json);
+        }.bind(this));
     },
     update: function() {
         this.center.y = this.height / 2;
@@ -1010,6 +1023,7 @@ phina.define('TitleScene', {
         shortcut.remove("Up");
         shortcut.remove("Down");
         shortcut.remove("Space");
+        shortcut.remove("Enter");
         this.exit({
             id: id,
             json: json
