@@ -41,11 +41,12 @@ function colorOf(id, mode) {
 // やっぱりコードが汚い… 自分で言うのもアレですがいっそ書き直した方がいいような気がしている
 phina.define('MainScene', {
     superClass: 'phina.display.DisplayScene',
-    init: function() {
+    init: function(param) {
         this.superInit();
         this.notetype = NORMAL;
         this.level = "normal";
-        this.json = {
+        this.id = param.id;
+        this.json = param.json || {
             title: "Lorem Ipsum",
             artist: "Dolor",
             bpm: 158,
@@ -57,6 +58,7 @@ phina.define('MainScene', {
             },
             map: {}
         };
+        console.log(this.id);
 
         this.NOTES_INTERVAL = 30;
         shortcut.add("Ctrl+Shift+Up", function() {
@@ -391,9 +393,9 @@ phina.define('MainScene', {
             this.fill = "#a43220";
         }).addChildTo(this);
 
-        Button({text: "Load"}).setPosition(BUTTONS_X, 530).on("pointstart", function() {
-            this.app.pushScene(LoadMenuScene(this));
-        }.bind(this)).addChildTo(this);
+        // Button({text: "Load"}).setPosition(BUTTONS_X, 530).on("pointstart", function() {
+        //     this.app.pushScene(LoadMenuScene(this));
+        // }.bind(this)).addChildTo(this);
 
         // Button({text: "Setting", fill: "grey"}).setPosition(BUTTONS_X, 610).on("pointstart", function() {
         //     this.app.pushScene(MetaSettingScene(this.json));
@@ -998,18 +1000,20 @@ phina.define('TitleScene', {
         }.bind(this));
 
         shortcut.add("Space", function() {
-            alert(this.selectedIndex);
-            this.goToMainScene();
+            this.goToMainScene(this.selectedIndex, saves[this.selectedIndex].json);
         }.bind(this));
     },
     update: function() {
         this.center.y = this.height / 2;
     },
-    goToMainScene: function() {
+    goToMainScene: function(id, json) {
         shortcut.remove("Up");
         shortcut.remove("Down");
         shortcut.remove("Space");
-        this.exit();
+        this.exit({
+            id: id,
+            json: json
+        });
     }
 
 });
