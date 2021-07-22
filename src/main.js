@@ -451,32 +451,32 @@ phina.define('MainScene', {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-        const updateCurrentLine = function() {
-            this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
-
-            if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
-                this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
-            }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
-                this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
-            }
-        }.bind(this);
+        // const updateCurrentLine = function() {
+        //     this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+        //
+        //     if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
+        //         this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
+        //     }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
+        //         this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
+        //     }
+        // }.bind(this);
         shortcut.add("Up", function() {
             if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1)){
                 this.currentLinePos += this.noteMeasure;
             }
-            updateCurrentLine();
+            this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Down", function() {
             if (this.currentLinePos >= this.noteMeasure) {
                 this.currentLinePos -= this.noteMeasure;
             }
-            updateCurrentLine();
+            this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Shift+Up", function() {
             if(this.currentLinePos + 16 < this.lengths[this.level].sum.slice(-1)){
                 this.currentLinePos += 16;
             }
-            updateCurrentLine();
+            this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Shift+Down", function() {
             if (this.currentLinePos >= 16) {
@@ -484,7 +484,7 @@ phina.define('MainScene', {
             }else{
                 this.currentLinePos = 0;
             }
-            updateCurrentLine();
+            this.updateCurrentLine();
         }.bind(this));
 
         this.noteMeasure = 4;
@@ -646,8 +646,12 @@ phina.define('MainScene', {
         this.extend.y = 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
         this.cut.y = 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
 
+        const currentLineYInScreen = this.currentLine.y + this.score.y;
         this.currentLine.height = this.NOTES_INTERVAL;
         this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+
+        this.score.y = currentLineYInScreen - this.currentLine.y;
+        this.updateCurrentLine();
 
         this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
         this.s.reset();
@@ -887,7 +891,10 @@ phina.define('MainScene', {
                 this.toggleNoteAt(this.currentLinePos, 3);
             }.bind(this));
 
-
+            setInterval(function() {
+                const currentLineYInScreen = this.currentLine.y + this.score.y;
+                console.log(currentLineYInScreen);
+            }.bind(this), 300);
     },
     toggleTripletVisibility: function() {
         this.tripletNotes.visible = !this.tripletNotes.visible;
@@ -947,6 +954,15 @@ phina.define('MainScene', {
         this.noteTypeButton.fill = colorOf(this.notetype);
 
         this.currentLine.fill = colorOf(this.notetype);
+    },
+    updateCurrentLine: function() {
+        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+
+        if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
+            this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
+        }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
+            this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
+        }
     }
 });
 
