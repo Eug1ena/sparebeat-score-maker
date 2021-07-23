@@ -374,23 +374,44 @@ phina.define("MainScene", {
         const updateDifficulty = function(level) {
             this.level = level;
             this.fullUpdate();
-            easyButton.fill = "#1abc9c";
-            normalButton.fill = "#f1c40f";
-            hardButton.fill = "#c0392b";
+            easyButton.fill = "#18997a";
+            normalButton.fill = "#b89314";
+            hardButton.fill = "#a43220";
         }.bind(this);
 
-        const easyButton = Button({text: "Easy", fill: "#1abc9c"}).setPosition(BUTTONS_X, 290).on("pointstart", function() {
+        const easyButton = Button({text: "E", fill: "#18997a", cornerRadius: 0, width: 54, x: -54, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("easy");
-            this.fill = "#18997a";
-        }).addChildTo(this);
-        const normalButton = Button({text: "Normal", fill: "#cea20a"}).setPosition(BUTTONS_X, 370).on("pointstart", function() {
+            this.fill = "#2cc7a8";
+        });
+        const normalButton = Button({text: "N", fill: "#b89314", cornerRadius: 0, width: 54, x: 0, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("normal");
-            this.fill = "#cea20a";
-        }).addChildTo(this)
-        const hardButton = Button({text: "Hard", fill: "#c0392b"}).setPosition(BUTTONS_X, 450).on("pointstart", function() {
+            this.fill = "#dbbd12";
+        });
+        const hardButton = Button({text: "H", fill: "#a43220", cornerRadius: 0, width: 54, x: 54, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("hard");
-            this.fill = "#a43220";
-        }).addChildTo(this);
+            this.fill = "#db4030";
+        });
+        normalButton.fill = "#e6c509";
+
+        RectangleShape({
+            x: BUTTONS_X,
+            y: 290,
+            cornerRadius: 10,
+            stroke: null
+        }).setInteractive(true).addChildTo(this)
+        .addChild(phina.createClass({
+            superClass: DisplayElement,
+            init: function(options) {
+                this.superInit(options);
+
+                easyButton.addChildTo(this);
+                normalButton.addChildTo(this)
+                hardButton.addChildTo(this);
+            },
+            clip: function(canvas) {
+                canvas.beginPath().roundRect(-this.width / 2, -this.height / 2, this.width, this.height, this.parent.cornerRadius);
+            }
+        })({width: 160, height: 64}));
 
         // Button({text: "Load"}).setPosition(BUTTONS_X, 530).on("pointstart", function() {
         //     this.app.pushScene(LoadMenuScene(this));
