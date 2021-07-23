@@ -374,53 +374,47 @@ phina.define("MainScene", {
         const updateDifficulty = function(level) {
             this.level = level;
             this.fullUpdate();
-            easyButton.fill = "#18997a";
-            normalButton.fill = "#b89314";
-            hardButton.fill = "#a43220";
 
-            if(level == "easy") easyButton.fill = "#2cc7a8";
-            if(level == "normal") normalButton.fill = "#dbbd12";
-            if(level == "hard") hardButton.fill = "#db4030";
+            if(this.level == "easy") difficultyButton.text = "Easy", difficultyButton.fill = "#15bd94";
+            if(this.level == "normal") difficultyButton.text = "Normal", difficultyButton.fill = "#d1a715";
+            if(this.level == "hard") difficultyButton.text = "Hard", difficultyButton.fill = "#e33519";
         }.bind(this);
 
-        const easyButton = Button({text: "E", fill: "#18997a", cornerRadius: 0, width: 54, x: -54, fontSize: 24, stroke: null}).on("pointstart", function() {
-            updateDifficulty("easy");
-        });
-        const normalButton = Button({text: "N", fill: "#b89314", cornerRadius: 0, width: 54, x: 0, fontSize: 24, stroke: null}).on("pointstart", function() {
-            updateDifficulty("normal");
-        });
-        const hardButton = Button({text: "H", fill: "#a43220", cornerRadius: 0, width: 54, x: 54, fontSize: 24, stroke: null}).on("pointstart", function() {
-            updateDifficulty("hard");
-        });
-        normalButton.fill = "#dbbd12";
+        const difficultyButton = Button({text: "Normal", fill: "#d1a715", x: BUTTONS_X, y: 290, stroke: null}).on("pointstart", function() {
+            if(this.level == "easy") updateDifficulty("normal");
+            else if(this.level == "normal") updateDifficulty("hard");
+            else if(this.level == "hard") updateDifficulty("easy");
+        }.bind(this)).addChildTo(this);
         shortcut.add("O", function() {
-            if(this.level == "normal") updateDifficulty("easy");
+            if(this.level == "easy") updateDifficulty("hard");
+            else if(this.level == "normal") updateDifficulty("easy");
             else if(this.level == "hard") updateDifficulty("normal");
         }.bind(this));
         shortcut.add("P", function() {
-            if(this.level == "normal") updateDifficulty("hard");
-            else if(this.level == "easy") updateDifficulty("normal");
+            if(this.level == "easy") updateDifficulty("normal");
+            else if(this.level == "normal") updateDifficulty("hard");
+            else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this));
-        
-        RectangleShape({
-            x: BUTTONS_X,
-            y: 290,
-            cornerRadius: 10,
-            stroke: null
-        }).setInteractive(true).addChildTo(this)
-        .addChild(phina.createClass({
-            superClass: DisplayElement,
-            init: function(options) {
-                this.superInit(options);
 
-                easyButton.addChildTo(this);
-                normalButton.addChildTo(this)
-                hardButton.addChildTo(this);
-            },
-            clip: function(canvas) {
-                canvas.beginPath().roundRect(-this.width / 2, -this.height / 2, this.width, this.height, this.parent.cornerRadius);
-            }
-        })({width: 160, height: 64}));
+        // RectangleShape({
+        //     x: BUTTONS_X,
+        //     y: 290,
+        //     cornerRadius: 10,
+        //     stroke: null
+        // }).setInteractive(true).addChildTo(this)
+        // .addChild(phina.createClass({
+        //     superClass: DisplayElement,
+        //     init: function(options) {
+        //         this.superInit(options);
+        //
+        //         easyButton.addChildTo(this);
+        //         normalButton.addChildTo(this)
+        //         hardButton.addChildTo(this);
+        //     },
+        //     clip: function(canvas) {
+        //         canvas.beginPath().roundRect(-this.width / 2, -this.height / 2, this.width, this.height, this.parent.cornerRadius);
+        //     }
+        // })({width: 160, height: 64}));
 
         // Button({text: "Load"}).setPosition(BUTTONS_X, 530).on("pointstart", function() {
         //     this.app.pushScene(LoadMenuScene(this));
