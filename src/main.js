@@ -451,15 +451,6 @@ phina.define("MainScene", {
             if (!result) console.error("export failed!");
         }.bind(this));
 
-        // const updateCurrentLine = function() {
-        //     this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
-        //
-        //     if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
-        //         this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
-        //     }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
-        //         this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
-        //     }
-        // }.bind(this);
         shortcut.add("Up", function() {
             if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1)){
                 this.currentLinePos += this.noteMeasure;
@@ -651,6 +642,7 @@ phina.define("MainScene", {
         this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
 
         this.score.y = currentLineYInScreen - this.currentLine.y;
+        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
         this.updateCurrentLine();
 
         this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
@@ -958,10 +950,10 @@ phina.define("MainScene", {
     updateCurrentLine: function() {
         this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
 
-        if(this.score.position.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
-            this.score.position.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
-        }else if(this.score.position.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
-            this.score.position.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
+        if(this.score.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
+            this.score.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
+        }else if(this.score.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
+            this.score.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
         }
     }
 });
