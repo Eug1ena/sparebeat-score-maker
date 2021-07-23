@@ -377,22 +377,31 @@ phina.define("MainScene", {
             easyButton.fill = "#18997a";
             normalButton.fill = "#b89314";
             hardButton.fill = "#a43220";
+
+            if(level == "easy") easyButton.fill = "#2cc7a8";
+            if(level == "normal") normalButton.fill = "#dbbd12";
+            if(level == "hard") hardButton.fill = "#db4030";
         }.bind(this);
 
         const easyButton = Button({text: "E", fill: "#18997a", cornerRadius: 0, width: 54, x: -54, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("easy");
-            this.fill = "#2cc7a8";
         });
         const normalButton = Button({text: "N", fill: "#b89314", cornerRadius: 0, width: 54, x: 0, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("normal");
-            this.fill = "#dbbd12";
         });
         const hardButton = Button({text: "H", fill: "#a43220", cornerRadius: 0, width: 54, x: 54, fontSize: 24, stroke: null}).on("pointstart", function() {
             updateDifficulty("hard");
-            this.fill = "#db4030";
         });
-        normalButton.fill = "#e6c509";
-
+        normalButton.fill = "#dbbd12";
+        shortcut.add("O", function() {
+            if(this.level == "normal") updateDifficulty("easy");
+            else if(this.level == "hard") updateDifficulty("normal");
+        }.bind(this));
+        shortcut.add("P", function() {
+            if(this.level == "normal") updateDifficulty("hard");
+            else if(this.level == "easy") updateDifficulty("normal");
+        }.bind(this));
+        
         RectangleShape({
             x: BUTTONS_X,
             y: 290,
