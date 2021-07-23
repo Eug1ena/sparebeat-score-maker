@@ -281,20 +281,20 @@ phina.define("MainScene", {
             baseline: "top",
             x: 60, y: 680
         }).addChildTo(this);
-        const BUTTONS_X = 860;
+        this.BUTTONS_X = 860;
 
         this.noteTypeButton = Button({
             text: "Normal Notes",
             fill: colorOf(NORMAL),
             fontSize: 20,
-            x: BUTTONS_X, y: 50
+            x: this.BUTTONS_X, y: 50
         }).on("pointstart", this.changeNoteType.bind(this)).addChildTo(this);
-        Button({text: "Triplet", x: BUTTONS_X, y: 130}).on("pointstart", this.toggleTripletVisibility.bind(this)).addChildTo(this);
+        Button({text: "Triplet", x: this.BUTTONS_X, y: 130}).on("pointstart", this.toggleTripletVisibility.bind(this)).addChildTo(this);
 
         const editZones = Button({
             text: "Edit Zones",
             fontSize: 20,
-            x: BUTTONS_X, y: 210
+            x: this.BUTTONS_X, y: 210
         }).addChildTo(this);
         editZones.addChild(phina.createClass({
             superClass: DisplayElement,
@@ -380,7 +380,7 @@ phina.define("MainScene", {
             if(this.level == "hard") difficultyButton.text = "Hard", difficultyButton.fill = "#e33519";
         }.bind(this);
 
-        const difficultyButton = Button({text: "Normal", fill: "#d1a715", x: BUTTONS_X, y: 290, stroke: null}).on("pointstart", function() {
+        const difficultyButton = Button({text: "Normal", fill: "#d1a715", x: this.BUTTONS_X, y: 290, stroke: null}).on("pointstart", function() {
             if(this.level == "easy") updateDifficulty("normal");
             else if(this.level == "normal") updateDifficulty("hard");
             else if(this.level == "hard") updateDifficulty("easy");
@@ -395,34 +395,6 @@ phina.define("MainScene", {
             else if(this.level == "normal") updateDifficulty("hard");
             else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this));
-
-        // RectangleShape({
-        //     x: BUTTONS_X,
-        //     y: 290,
-        //     cornerRadius: 10,
-        //     stroke: null
-        // }).setInteractive(true).addChildTo(this)
-        // .addChild(phina.createClass({
-        //     superClass: DisplayElement,
-        //     init: function(options) {
-        //         this.superInit(options);
-        //
-        //         easyButton.addChildTo(this);
-        //         normalButton.addChildTo(this)
-        //         hardButton.addChildTo(this);
-        //     },
-        //     clip: function(canvas) {
-        //         canvas.beginPath().roundRect(-this.width / 2, -this.height / 2, this.width, this.height, this.parent.cornerRadius);
-        //     }
-        // })({width: 160, height: 64}));
-
-        // Button({text: "Load"}).setPosition(BUTTONS_X, 530).on("pointstart", function() {
-        //     this.app.pushScene(LoadMenuScene(this));
-        // }.bind(this)).addChildTo(this);
-
-        // Button({text: "Setting", fill: "grey"}).setPosition(BUTTONS_X, 610).on("pointstart", function() {
-        //     this.app.pushScene(MetaSettingScene(this.json));
-        // }.bind(this)).addChildTo(this);
 
         const importFile = function(file) {
             const fileReader = new FileReader();
@@ -586,6 +558,7 @@ phina.define("MainScene", {
         }.bind(this)).setInteractive(true).addChildTo(this);
         this.bpmLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
+        this.initSongFileButton();
         this.initShortcutKey();
 
         this.import(this.json);
@@ -605,6 +578,16 @@ phina.define("MainScene", {
     update: function() {
         this.screenBottom.y = this.height;
         this.currentPos.height = this.height / 60;
+
+        // const domLeft = appCanvas.getBoundingClientRect().left;
+        // const domTop = appCanvas.getBoundingClientRect().top;
+        // const canvasWidth = appCanvas.getBoundingClientRect().width;
+        // const buttonWidth = 160;
+        // const buttonLeft = this.BUTTONS_X / SCREEN_WIDTH * canvasWidth - buttonWidth / 2;
+        //
+        // this.divDom.style.left = `${domLeft}px`;
+        // this.divDom.style.top = `${domTop}px`;
+        // this.songFileButton.style.left = `${buttonLeft}px`;
     },
     updateDencityGraph: function() {
         while (this.dencityGraph.children.length > this.notesCountOfBar[this.level].length) this.dencityGraph.children.last.remove();
@@ -909,8 +892,46 @@ phina.define("MainScene", {
 
             setInterval(function() {
                 const currentLineYInScreen = this.currentLine.y + this.score.y;
-                console.log(currentLineYInScreen);
             }.bind(this), 300);
+    },
+    initSongFileButton: function() {
+        // const domLeft = appCanvas.getBoundingClientRect().left;
+        // const domTop = appCanvas.getBoundingClientRect().top;
+        // const canvasWidth = appCanvas.getBoundingClientRect().width;
+        // const buttonWidth = 160;
+        // const buttonHeight = 64;
+        // const buttonLeft = this.BUTTONS_X / SCREEN_WIDTH * canvasWidth - buttonWidth / 2;
+        // console.log(buttonLeft);
+        // const buttonTop = 0;
+
+        // this.divDom = document.createElement("div");
+        // this.divDom.style.position = "absolute";
+        // this.divDom.style.left = `${domLeft}px`;
+        // this.divDom.style.top = `${domTop}px`;
+        // document.body.appendChild(this.divDom);
+
+        const fileButton = document.createElement("input");
+        fileButton.setAttribute("type", "file");
+        fileButton.setAttribute("accept", ".mp3,.m4a,.aac,.wav,.flac");
+        // this.songFileButton.style.width = `${buttonWidth}px`;
+        // this.songFileButton.style.height = `${buttonHeight}px`;
+        // this.songFileButton.style.position = "absolute";
+        // this.songFileButton.style.left = `${buttonLeft}px`;
+        // this.songFileButton.style.top = `${buttonTop}px`;
+        // this.songFileButton.style.fontSize = "20px";
+
+        // this.divDom.appendChild(this.songFileButton);
+
+        Button({
+            text: "Choose File",
+            fontSize: 22,
+            x: this.BUTTONS_X, y: 210 + 80 * 2
+        }).on("pointstart", function() {
+            fileButton.addEventListener('click', function(e){
+                e.stopPropagation();
+            });
+            fileButton.click();
+        }.bind(this)).addChildTo(this);
     },
     toggleTripletVisibility: function() {
         this.tripletNotes.visible = !this.tripletNotes.visible;
@@ -989,7 +1010,6 @@ phina.define("TitleScene", {
 
         // 各セーブデータのkeyは"json"(譜面データ)と"changed"
         const saves = JSON.parse(localStorage.getItem("saves") || "[]");
-        console.log(saves);
 
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
 
@@ -1061,7 +1081,6 @@ phina.define("TitleScene", {
             json: json
         });
     }
-
 });
 
 // 各小節の長さを管理するクラス
@@ -1126,6 +1145,8 @@ phina.define("Message", {
     }
 });
 
+let appCanvas;
+
 phina.main(function() {
     const app = GameApp({
         width: SCREEN_WIDTH,
@@ -1138,6 +1159,8 @@ phina.main(function() {
     app.domElement.style["display"] = "block";
     app.domElement.style["margin-left"] = "auto";
     app.domElement.style["margin-right"] = "auto";
+
+    appCanvas = app.canvas.canvas;
 
     const fitFunc = function() {
         app.height = innerHeight;
