@@ -2,7 +2,7 @@
 // 子要素の状態は外部に保存しなければならない。
 // 今になって見ると内部で保存してくれるようになってた方がいいのかと思う。
 phina.define("InfiniteOf", {
-    superClass: 'phina.display.DisplayElement',
+    superClass: "phina.display.DisplayElement",
     init: function(source, pitch, options) {
         this.superInit(options);
         this.source = source;
@@ -26,7 +26,7 @@ phina.define("InfiniteOf", {
         this.nodemin = backrate - 1;
         this.nodemax = i + backrate;
         this.children.each(function(child) {
-            (child._i < this.nodemin || child._i > this.nodemax) && child.has('removed') && child.flare('removed');
+            (child._i < this.nodemin || child._i > this.nodemax) && child.has("removed") && child.flare("removed");
         }, this);
         this.children = this.children.filter(function(child) {
             return child._i >= this.nodemin && child._i <= this.nodemax;
@@ -40,7 +40,7 @@ phina.define("InfiniteOf", {
         this.nodemin = Infinity;
         this.nodemax = -Infinity;
         this.children.each(function(child) {
-            child.has('removed') && child.flare('removed');
+            child.has("removed") && child.flare("removed");
         });
         this.children = [];
     }
@@ -48,7 +48,7 @@ phina.define("InfiniteOf", {
 
 // 子要素を一定間隔あけて自動配置するグループ要素
 phina.define("List", {
-    superClass: 'phina.display.DisplayElement',
+    superClass: "phina.display.DisplayElement",
     renderChildBySelf: true,
     init: function(vertical, padding, options) {
         this.superInit(options);
@@ -123,7 +123,7 @@ phina.define("List", {
 });
 
 // 親子関係のルートから順番に格納された配列
-phina.app.Element.prototype.getter('sequence', function() {
+phina.app.Element.prototype.getter("sequence", function() {
     var sequence = [];
     for(var n = this; n;) {
         sequence.unshift(n);
@@ -133,7 +133,7 @@ phina.app.Element.prototype.getter('sequence', function() {
 });
 
 // 要素の絶対座標
-phina.app.Object2D.prototype.getter('globalPosition', function() {
+phina.app.Object2D.prototype.getter("globalPosition", function() {
     this.sequence.each(function(val) {val._calcWorldMatrix && val._calcWorldMatrix()});
     // this._worldMatrix.clone().multiplyVector2(Vector2(0, 0))
     return phina.geom.Vector2(this._worldMatrix.m02, this._worldMatrix.m12);

@@ -1,22 +1,22 @@
-phina.define('LoadMenuScene', {
-    superClass: 'phina.display.DisplayScene',
+phina.define("LoadMenuScene", {
+    superClass: "phina.display.DisplayScene",
     init: function(main) {
         this.superInit();
         this.backgroundColor = "#4444";
-        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        const saves = JSON.parse(localStorage.getItem("saves") || "[]");
         saves.sort(function(a, b) {return a.changed - b.changed;});
         const group = List(true, 25, {x: 35, y: 25}).addChildTo(this);
         saves.each(function(save, index) {
-            SaveData(save).addChildTo(group).on('pointstart', function() {
+            SaveData(save).addChildTo(group).on("pointstart", function() {
                 if (this.childclicked) this.childclicked = false;
                 else {
                     main.import(save.json);
                     main.id = index;
                 }
-            }).on('delete', function() {
+            }).on("delete", function() {
                 this.childclicked = true;
                 saves.splice(index, 1);
-                localStorage.setItem('saves', JSON.stringify(saves));
+                localStorage.setItem("saves", JSON.stringify(saves));
                 if (main.id === index) main.id = undefined;
                 else if (main.id > index) main.id--;
             }.bind(this));
@@ -25,7 +25,7 @@ phina.define('LoadMenuScene', {
             Label({x: SCREEN_CENTER_X, y: SCREEN_CENTER_Y, text: "データがありません", stroke: "#aaa", fill: "#222"}).addChildTo(this);
         }
         this.on("enter", function(e) {
-            e.app.domElement.addEventListener('wheel', function(e) {
+            e.app.domElement.addEventListener(wheel, function(e) {
                 group.y = Math.min(Math.max(group.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 600 - group.children.reduce(function(h, ch) {return h + ch.height + group.padding}, 0)), group.padding);
             });
         });
@@ -36,8 +36,8 @@ phina.define('LoadMenuScene', {
     }
 });
 
-phina.define('SaveData', {
-    superClass: 'phina.display.Shape',
+phina.define("SaveData", {
+    superClass: "phina.display.Shape",
     init: function(save) {
         this.superInit();
         this.width = 880;
@@ -52,9 +52,9 @@ phina.define('SaveData', {
         Label({x: 10, y: 80, align: "left", fontSize: 16, text: "Last changed: " + new Date(save.changed).toLocaleString("japanese")}).addChildTo(this);
 
         const deleteButton = Button({x: 840, y: 80, fill: "#422", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(this);
-        deleteButton.on('pointstart', function() {
+        deleteButton.on("pointstart", function() {
             this.childclicked = true;
-            this.flare('delete');
+            this.flare("delete");
             this.remove();
         }.bind(this));
     }

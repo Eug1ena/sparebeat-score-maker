@@ -39,8 +39,8 @@ function colorOf(id, mode) {
 }
 
 // やっぱりコードが汚い… 自分で言うのもアレですがいっそ書き直した方がいいような気がしている
-phina.define('MainScene', {
-    superClass: 'phina.display.DisplayScene',
+phina.define("MainScene", {
+    superClass: "phina.display.DisplayScene",
     init: function(param) {
         this.superInit();
         this.notetype = NORMAL;
@@ -147,7 +147,7 @@ phina.define('MainScene', {
             }
             for (let j = 0; j < this.lengths[this.level].length; j++) {
                 if (this.lengths[this.level].sum[j] > i) {
-                    if (this.lengths[this.level].diff[j] % 4 === 0 && (i - (j === 0 ? 0 : this.lengths[this.level].sum[j - 1])) % 4 === 0) return PathShape({paths: [Vector2(-1000, 0), Vector2(1000, 0)], y: -1, strokeWidth: 1, stroke: '#cccccc'});
+                    if (this.lengths[this.level].diff[j] % 4 === 0 && (i - (j === 0 ? 0 : this.lengths[this.level].sum[j - 1])) % 4 === 0) return PathShape({paths: [Vector2(-1000, 0), Vector2(1000, 0)], y: -1, strokeWidth: 1, stroke: "#cccccc"});
                     return Element();
                 }
             }
@@ -188,9 +188,9 @@ phina.define('MainScene', {
             }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
             else {
                 if (this.newZone) {
-                    group.on('pointover', function() {this.setScale(1.1)})
-                    .on('pointout', function() {this.setScale(1)})
-                    .on('pointstart', function() {
+                    group.on("pointover", function() {this.setScale(1.1)})
+                    .on("pointout", function() {this.setScale(1)})
+                    .on("pointstart", function() {
                         this.notesData[this.level][i][this.newZone.lane] = this.newZone.type;
                         editZones.interactive = true;
                         this.newZone.fill = Button.defaults.fill;
@@ -205,14 +205,14 @@ phina.define('MainScene', {
                     if (!this.newZone) key.on("pointstart", function(){ self.toggleNoteAt(i, j); }.bind(self) ).setInteractive(true);
                 }
                 if (this.notesData[this.level][i].bind) {
-                    Label({x: -130, text: "["}).on('pointstart', function() {
+                    Label({x: -130, text: "["}).on("pointstart", function() {
                         this.notesData[this.level][i].bind = NOTHING;
                         this.notes.reset();
                         this.tripletNotes.reset();
                     }.bind(this)).setInteractive(true).addChildTo(group).rotation = this.notesData[this.level][i].bind === START ? -90 : 90;
                 }
                 if (this.notesData[this.level][i].random) {
-                    Label({x: -150, text: "{"}).on('pointstart', function() {
+                    Label({x: -150, text: "{"}).on("pointstart", function() {
                         this.notesData[this.level][i].random = NOTHING;
                         this.notes.reset();
                         this.tripletNotes.reset();
@@ -239,9 +239,9 @@ phina.define('MainScene', {
             }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: "#666666", stroke: null}).addChildTo(group);
             else {
                 if (this.newZone) {
-                    group.on('pointover', group.setScale.bind(group, 1.1))
-                    .on('pointout', group.setScale.bind(group, 1))
-                    .on('pointstart', function() {
+                    group.on("pointover", group.setScale.bind(group, 1.1))
+                    .on("pointout", group.setScale.bind(group, 1))
+                    .on("pointstart", function() {
                         this.tripletNotesData[this.level][i][this.newZone.lane] = this.newZone.type;
                         editZones.interactive = true;
                         this.newZone.fill = Button.defaults.fill;
@@ -256,14 +256,14 @@ phina.define('MainScene', {
                     if (!this.newZone) key.on("pointstart", function(){ self.toggleTripletNoteAt(i, j) }.bind(self) ).setInteractive(true);
                 }
                 if (this.tripletNotesData[this.level][i].bind) {
-                    Label({x: 130, text: "["}).on('pointstart', function() {
+                    Label({x: 130, text: "["}).on("pointstart", function() {
                         this.tripletNotesData[this.level][i].bind = NOTHING;
                         this.notes.reset();
                         this.tripletNotes.reset();
                     }.bind(this)).setInteractive(true).addChildTo(group).rotation = this.tripletNotesData[this.level][i].bind === START ? -90 : 90;
                 }
                 if (this.tripletNotesData[this.level][i].random) {
-                    Label({x: 150, text: "{"}).on('pointstart', function() {
+                    Label({x: 150, text: "{"}).on("pointstart", function() {
                         this.tripletNotesData[this.level][i].random = NOTHING;
                         this.notes.reset();
                         this.tripletNotes.reset();
@@ -301,9 +301,9 @@ phina.define('MainScene', {
             init: function(options) {
                 this.superInit(options);
                 this.clipX = this.width;
-                editZones.on('pointover', function() {
+                editZones.on("pointover", function() {
                     this.tweener.clear().to({clipX: 0}, 500, "easeOutCubic").play();
-                }.bind(this)).on('pointout', function() {
+                }.bind(this)).on("pointout", function() {
                     this.tweener.clear().to({clipX: this.width}, 500, "easeOutCubic").play();
                     this.cancel.tweener.to({y: 39}, 500, "easeOutCubic").play();
                     this.cancel.interactive = false;
@@ -330,7 +330,7 @@ phina.define('MainScene', {
                     cornerRadius: 0,
                     height: 14,
                     y: 39,
-                    fill: '#c0392b'
+                    fill: "#c0392b"
                 }).addChildTo(this);
                 this.cancel.interactive = false;
             },
@@ -341,11 +341,11 @@ phina.define('MainScene', {
                 const scene = this.getRoot();
                 const self = this;
                 this.buttons.each(function(button) {
-                    button.on('pointstart', function() {
+                    button.on("pointstart", function() {
                         self.buttons.each(function(button) {
                             button.fill = Button.defaults.fill;
                         });
-                        this.fill = 'hsl(200, 70%, 50%)';
+                        this.fill = "hsl(200, 70%, 50%)";
                         scene.newZone = this;
                         scene.notes.reset();
                         scene.tripletNotes.reset();
@@ -354,7 +354,7 @@ phina.define('MainScene', {
                         self.cancel.tweener.to({y: 25}, 500, "easeOutCubic").play();
                     });
                 });
-                this.cancel.on('pointstart', function() {
+                this.cancel.on("pointstart", function() {
                     self.buttons.each(function(button) {
                         button.fill = Button.defaults.fill;
                     });
@@ -414,14 +414,14 @@ phina.define('MainScene', {
         });
 
         this.on("enter", function(e) {
-            e.app.domElement.addEventListener('wheel', function(e) {
+            e.app.domElement.addEventListener("wheel", function(e) {
                 // e.deltaMode は 0なら1が1px、1なら1が1行であることを意味する
                 this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
                 this.updateGraphY();
             }.bind(this));
             e.app.domElement.addEventListener("dragover", function(event) {
                 event.preventDefault();
-                event.dataTransfer.dropEffect = 'copy';
+                event.dataTransfer.dropEffect = "copy";
             });
             e.app.domElement.addEventListener("drop", function(event) {
                 event.preventDefault();
@@ -432,19 +432,19 @@ phina.define('MainScene', {
         document.getElementById("export").addEventListener("click", function() {
             const json = this.export();
             console.time("copy");
-            const temp = document.createElement('textarea');
+            const temp = document.createElement("textarea");
 
             temp.value = json;
             temp.selectionStart = 0;
             temp.selectionEnd = temp.value.length;
 
             const s = temp.style;
-            s.position = 'fixed';
-            s.left = '-100%';
+            s.position = "fixed";
+            s.left = "-100%";
 
             document.body.appendChild(temp);
             temp.focus();
-            const result = document.execCommand('copy');
+            const result = document.execCommand("copy");
             temp.blur();
             document.body.removeChild(temp);
             console.timeEnd("copy");
@@ -576,7 +576,7 @@ phina.define('MainScene', {
         this.import(this.json);
     },
     save: function() {
-        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        const saves = JSON.parse(localStorage.getItem("saves") || "[]");
         this.export();
         const save = {changed: Date.now(), json: this.json};
         if (this.id !== undefined) {
@@ -585,7 +585,7 @@ phina.define('MainScene', {
             this.id = saves.length;
             saves.push(save);
         }
-        localStorage.setItem('saves', JSON.stringify(saves));
+        localStorage.setItem("saves", JSON.stringify(saves));
     },
     update: function() {
         this.screenBottom.y = this.height;
@@ -966,13 +966,13 @@ phina.define('MainScene', {
     }
 });
 
-phina.define('TitleScene', {
-    superClass: 'phina.display.DisplayScene',
+phina.define("TitleScene", {
+    superClass: "phina.display.DisplayScene",
     init: function() {
         this.superInit();
 
         // 各セーブデータのkeyは"json"(譜面データ)と"changed"
-        const saves = JSON.parse(localStorage.getItem('saves') || "[]");
+        const saves = JSON.parse(localStorage.getItem("saves") || "[]");
         console.log(saves);
 
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
@@ -1082,6 +1082,31 @@ phina.define("Lengths", {
         totalBarsCount: {
             get: function() {return this.sum[this.length - 1];},
         }
+    }
+});
+
+// 上部のメッセージ
+phina.define("Message", {
+    superClass: "phina.display.Shape",
+    init: function(save) {
+        this.superInit();
+        this.width = 880;
+        this.height = 88;
+        this.interactive = true;
+        this.origin.set(0, 0);
+        this.backgroundColor = "#888c";
+
+        Label({x: 10, y: 20, align: "left", fontSize: 16, text: (save.json.title || "タイトルなし") + (save.json.artist !== "" ? " / " : "") + save.json.artist}).addChildTo(this);
+        Label({x: 10, y: 40, align: "left", fontSize: 16, text: "BPM: " + save.json.bpm}).addChildTo(this);
+        Label({x: 10, y: 60, align: "left", fontSize: 16, text: "Level: " + save.json.level.easy + "/" + save.json.level.normal + "/" + save.json.level.hard}).addChildTo(this);
+        Label({x: 10, y: 80, align: "left", fontSize: 16, text: "Last changed: " + new Date(save.changed).toLocaleString("japanese")}).addChildTo(this);
+
+        const deleteButton = Button({x: 840, y: 80, fill: "#422", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(this);
+        deleteButton.on("pointstart", function() {
+            this.childclicked = true;
+            this.flare("delete");
+            this.remove();
+        }.bind(this));
     }
 });
 
