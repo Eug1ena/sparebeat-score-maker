@@ -868,8 +868,12 @@ phina.define("MainScene", {
                 this.changeNoteType();
             }.bind(this));
 
-            this.music = Music("Shining Star.mp3");
+            this.music = Music();
             shortcut.add("L", function() {
+                if(!this.music.isSet()){
+                    alert("音声を再生するには、Load Songボタンから音声ファイルを選択してください。");
+                    return;
+                }
                 if(this.music.isPlaying()){
                     this.music.stop();
                 }else{
@@ -895,43 +899,39 @@ phina.define("MainScene", {
             }.bind(this), 300);
     },
     initSongFileButton: function() {
-        // const domLeft = appCanvas.getBoundingClientRect().left;
-        // const domTop = appCanvas.getBoundingClientRect().top;
-        // const canvasWidth = appCanvas.getBoundingClientRect().width;
-        // const buttonWidth = 160;
-        // const buttonHeight = 64;
-        // const buttonLeft = this.BUTTONS_X / SCREEN_WIDTH * canvasWidth - buttonWidth / 2;
-        // console.log(buttonLeft);
-        // const buttonTop = 0;
-
-        // this.divDom = document.createElement("div");
-        // this.divDom.style.position = "absolute";
-        // this.divDom.style.left = `${domLeft}px`;
-        // this.divDom.style.top = `${domTop}px`;
-        // document.body.appendChild(this.divDom);
-
         const fileButton = document.createElement("input");
         fileButton.setAttribute("type", "file");
         fileButton.setAttribute("accept", ".mp3,.m4a,.aac,.wav,.flac");
-        // this.songFileButton.style.width = `${buttonWidth}px`;
-        // this.songFileButton.style.height = `${buttonHeight}px`;
-        // this.songFileButton.style.position = "absolute";
-        // this.songFileButton.style.left = `${buttonLeft}px`;
-        // this.songFileButton.style.top = `${buttonTop}px`;
-        // this.songFileButton.style.fontSize = "20px";
 
-        // this.divDom.appendChild(this.songFileButton);
-
-        Button({
-            text: "Choose File",
+        const visibleButton = Button({
+            text: "Load Song",
             fontSize: 22,
+            fill: "#f05d71",
+            stroke: "#d64b5e",
             x: this.BUTTONS_X, y: 210 + 80 * 2
         }).on("pointstart", function() {
-            fileButton.addEventListener('click', function(e){
+            fileButton.addEventListener('click', function(e) {
                 e.stopPropagation();
             });
             fileButton.click();
         }.bind(this)).addChildTo(this);
+
+        fileButton.addEventListener("change", function(e) {
+            if(fileButton.files.length == 0){
+                return;
+            }
+            const file = fileButton.files[0];
+            if(!file.type.match('audio.*')){
+                alert("音声ファイルを選択してください。");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.music.set(reader.result);
+                visibleButton.text = "Loaded!";
+            };
+            reader.readAsDataURL(file);
+        }.bind(this));
     },
     toggleTripletVisibility: function() {
         this.tripletNotes.visible = !this.tripletNotes.visible;

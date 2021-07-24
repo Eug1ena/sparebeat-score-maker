@@ -140,25 +140,33 @@ phina.app.Object2D.prototype.getter("globalPosition", function() {
 });
 
 phina.define("Music", {
-    init: function(filename) {
-        this.songName = filename;
-        this.songElement = document.createElement("audio");
-        this.songElement.src = "songs/" + this.songName;
+    init: function() {
+        this.element = document.createElement("audio");
+
+        console.log(this.element);
+    },
+    set: function(address) {
+        this.stop();
+        this.element.src = address;
+
     },
     play: function(time) {
-        this.songElement.play();
+        this.element.play();
     },
     // 時間はミリ秒で指定
     playAt: function(time) {
-        this.songElement.currentTime = time / 1000;
-        this.songElement.play();
+        this.element.currentTime = time / 1000;
+        this.element.play();
     },
     stop: function() {
-        this.songElement.pause();
-        this.songElement.currentTime = 0;
+        this.element.pause();
+        this.element.currentTime = 0;
     },
     isPlaying: function() {
-        return !this.songElement.paused;
+        return !this.element.paused;
+    },
+    isSet: function() {
+        return !!this.element.src;
     }
 
 });
