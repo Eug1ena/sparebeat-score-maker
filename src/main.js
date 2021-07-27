@@ -396,8 +396,12 @@ phina.define("MainScene", {
             else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this));
 
+        Button({text: "Load"}).setPosition(this.BUTTONS_X, 530).on("pointstart", function() {
+            this.app.pushScene(LoadMenuScene(this));
+        }.bind(this)).addChildTo(this);
+
         Button({text: "Setting", fill: "grey"}).setPosition(this.BUTTONS_X, 450).on("pointstart", function() {
-            this.app.pushScene(MetaSettingScene(this.json));
+            this.app.pushScene(MetaSettingScene(this));
         }.bind(this)).addChildTo(this);
 
         const importFile = function(file) {
@@ -662,6 +666,11 @@ phina.define("MainScene", {
         this.notes.reset();
         this.tripletNotes.pitch = Vector2(0, this.s.pitch.y / 3 * 2);
         this.tripletNotes.reset();
+    },
+    updateInformation: function() {
+        this.titleLabel.text = this.json.title;
+        this.artistLabel.text = "by " + this.json.artist;
+        this.bpmLabel.text = "BPM " + this.json.bpm;
     },
     fullUpdate: function() {
         this.updateBarsCount();

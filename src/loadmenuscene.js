@@ -15,6 +15,7 @@ phina.define("LoadMenuScene", {
                 }
             }).on("delete", function() {
                 this.childclicked = true;
+                console.log("ya");
                 saves.splice(index, 1);
                 localStorage.setItem("saves", JSON.stringify(saves));
                 if (main.id === index) main.id = undefined;
@@ -25,7 +26,7 @@ phina.define("LoadMenuScene", {
             Label({x: SCREEN_CENTER_X, y: SCREEN_CENTER_Y, text: "データがありません", stroke: "#aaa", fill: "#222"}).addChildTo(this);
         }
         this.on("enter", function(e) {
-            e.app.domElement.addEventListener(wheel, function(e) {
+            e.app.domElement.addEventListener("wheel", function(e) {
                 group.y = Math.min(Math.max(group.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 600 - group.children.reduce(function(h, ch) {return h + ch.height + group.padding}, 0)), group.padding);
             });
         });
@@ -53,7 +54,7 @@ phina.define("SaveData", {
 
         const deleteButton = Button({x: 840, y: 80, fill: "#422", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(this);
         deleteButton.on("pointstart", function() {
-            this.childclicked = true;
+            // this.childclicked = true;
             this.flare("delete");
             this.remove();
         }.bind(this));
