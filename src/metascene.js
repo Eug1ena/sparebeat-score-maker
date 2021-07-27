@@ -3,28 +3,30 @@ phina.define("MetaSettingScene", {
 	superClass: "phina.display.DisplayScene",
 	init: function(json) {
 		this.superInit();
-		this.backgroundColor = "#4444";
+		this.backgroundColor = "#666666da";
 		this.json = json;
 
-		RectangleShape({width: 650, height: 100, x: 480, y: 140, fill: "#eee", stroke: null}).addChildTo(this);
-		RectangleShape({width: 650, height: 100, x: 480, y: 270, fill: "#888c", stroke: null}).addChildTo(this);
-		RectangleShape({width: 650, height: 100, x: 480, y: 400, fill: "#888c", stroke: null}).addChildTo(this);
-
-		// const deleteButton = Button({x: 735, y: 155, fill: "#422", text: "Change", width: 100, height: 40, fontSize: 16}).addChildTo(this);
-        // deleteButton.on('pointstart', function() {
-        //     this.childclicked = true;
-        //     this.flare('delete');
-        //     this.remove();
-        // }.bind(this));
-
-		// RectangleShape({width: 500, height: 50, x: 520, y: 125, fill: "#ddd", stroke: null}).addChildTo(this);
-
-		Label({x: 190, y: 120, align: "left", fontSize: 25, text: "TITLE: That&s mya nae", fill: "black"}).addChildTo(this);
-		Label({x: 190, y: 250, align: "left", fontSize: 25, text: "BPM: 700", fill: "black"}).addChildTo(this);
-		Label({x: 190, y: 380, align: "left", fontSize: 25, text: "ARTIST: 700", fill: "black"}).addChildTo(this);
+		EditableLine(this, 120, "タイトル", this.json.title);
+		EditableLine(this, 180, "アーティスト", this.json.artist);
+		EditableLine(this, 240, "BPM", this.json.bpm);
+		EditableLine(this, 300, "StartTime", this.json.startTime);
+		EditableLine(this, 360, "レベル(Easy)", this.json.level["easy"]);
+		EditableLine(this, 420, "レベル(Normal)", this.json.level["normal"]);
+		EditableLine(this, 480, "レベル(Hard)", this.json.level["hard"]);
 
 	},
 	onpointstart: function() {
 		this.exit();
 	}
+});
+
+phina.define("EditableLine", {
+    superClass: "phina.display.Shape",
+    init: function(scene, y, title, value) {
+        this.superInit();
+
+		Label({x: 180, y: y, align: "left", fontSize: 27, text: title, fill: "#eee"}).addChildTo(scene);
+		Label({x: 780, y: y, align: "right", fontSize: 27, text: value, fill: "#eee"}).addChildTo(scene);
+
+    }
 });

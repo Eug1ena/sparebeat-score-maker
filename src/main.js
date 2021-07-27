@@ -396,6 +396,10 @@ phina.define("MainScene", {
             else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this));
 
+        Button({text: "Setting", fill: "grey"}).setPosition(this.BUTTONS_X, 450).on("pointstart", function() {
+            this.app.pushScene(MetaSettingScene(this.json));
+        }.bind(this)).addChildTo(this);
+
         const importFile = function(file) {
             const fileReader = new FileReader();
             fileReader.onload = function(event) {
