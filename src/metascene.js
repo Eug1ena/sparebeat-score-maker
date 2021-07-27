@@ -7,21 +7,23 @@ phina.define("MetaSettingScene", {
 		this.main = main;
 		this.json = this.main.json;
 
-		EditableLine(this, 120, "タイトル", this.json.title, function(label) {
+		const top = 120, margin = 60;
+
+		EditableLine(this, top + margin * 0, "タイトル", this.json.title, function(label) {
 			const ret = prompt("曲のタイトルを入力してください。", this.json.title);
 			if(ret){
 				this.json.title = ret;
 				label.text = ret;
             }
 		}.bind(this));
-		EditableLine(this, 180, "アーティスト", this.json.artist, function(label) {
+		EditableLine(this, top + margin * 1, "アーティスト", this.json.artist, function(label) {
 			const ret = prompt("アーティスト名を入力してください。", this.json.artist);
 			if(ret){
 				this.json.artist = ret;
 				label.text = ret;
             }
 		}.bind(this));
-		EditableLine(this, 240, "BPM", this.json.bpm, function(label) {
+		EditableLine(this, top + margin * 2, "BPM", this.json.bpm, function(label) {
 			const ret = prompt("BPMを入力してください。", this.json.bpm);
 			if(ret){
 				const bpm = parseFloat(ret);
@@ -33,7 +35,7 @@ phina.define("MetaSettingScene", {
 				}
 			}
 		}.bind(this));
-		EditableLine(this, 300, "startTime", this.json.startTime, function(label) {
+		EditableLine(this, top + margin * 3, "startTime", this.json.startTime, function(label) {
 			const ret = prompt("startTimeを入力してください。", this.json.startTime);
 			if(ret){
 				const startTime = parseInt(ret);
@@ -45,21 +47,21 @@ phina.define("MetaSettingScene", {
 				}
 			}
 		}.bind(this));
-		EditableLine(this, 360, "レベル(Easy)", this.json.level["easy"], function(label) {
+		EditableLine(this, top + margin * 4, "レベル(Easy)", this.json.level["easy"], function(label) {
 			const ret = prompt("Easyのレベルを入力してください。", this.json.level["easy"]);
 			if(ret){
 				this.json.level["easy"] = ret;
 				label.text = ret;
 			}
 		}.bind(this));
-		EditableLine(this, 420, "レベル(Normal)", this.json.level["normal"], function(label) {
+		EditableLine(this, top + margin * 5, "レベル(Normal)", this.json.level["normal"], function(label) {
 			const ret = prompt("Normalのレベルを入力してください。", this.json.level["normal"]);
 			if(ret){
 				this.json.level["normal"] = ret;
 				label.text = ret;
 			}
 		}.bind(this));
-		EditableLine(this, 480, "レベル(Hard)", this.json.level["hard"], function(label) {
+		EditableLine(this, top + margin * 6, "レベル(Hard)", this.json.level["hard"], function(label) {
 			const ret = prompt("Hardのレベルを入力してください。", this.json.level["hard"]);
 			if(ret){
 				this.json.level["hard"] = ret;

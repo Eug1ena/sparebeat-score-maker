@@ -485,11 +485,11 @@ phina.define("MainScene", {
         this.noteMeasure = 4;
         this.noteMeasureLabel = Label({
             text: "Selected: 4th Note",
-            fontSize: 22,
+            fontSize: 24,
             fontFamily: "Nova Mono",
             align: "left",
             baseline: "top",
-            x: 10, y: 150
+            x: 15, y: 15
         }).addChildTo(this);
 
         shortcut.add("Left", function() {
@@ -509,62 +509,6 @@ phina.define("MainScene", {
             this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
         }.bind(this));
-
-        this.titleLabel = Label({
-            text: "Lorem Ipsum",
-            fontSize: 22,
-            fontFamily: "Nova Mono",
-            padding: 0,
-            x: 10, y: 10,
-            fill: "black"
-        }).setOrigin(0, 0).on("pointstart", function() {
-            const ret = prompt("曲のタイトルを入力してください。", this.json.title);
-            if(ret){
-                this.json.title = ret;
-                this.titleLabel.text = ret;
-                this.save();
-            }
-        }.bind(this)).setInteractive(true).addChildTo(this);
-        this.titleLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
-
-        this.artistLabel = Label({
-            text: "by Dolor",
-            fontSize: 22,
-            fontFamily: "Nova Mono",
-            padding: 0,
-            x: 30, y: 38,
-            fill: "black"
-        }).setOrigin(0, 0).on("pointstart", function() {
-            const ret = prompt("アーティスト名を入力してください。", this.json.artist);
-            if(ret){
-                this.json.artist = ret;
-                this.artistLabel.text = "by " + ret;
-                this.save();
-            }
-        }.bind(this)).setInteractive(true).addChildTo(this);
-        this.artistLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
-
-        this.bpmLabel = Label({
-            text: "BPM 158",
-            fontSize: 22,
-            fontFamily: "Nova Mono",
-            padding: 0,
-            x: 10, y: 80,
-            fill: "black"
-        }).setOrigin(0, 0).on("pointstart", function() {
-            const ret = prompt("BPMを入力してください。", this.json.bpm);
-            if(ret){
-                const bpm = parseFloat(ret);
-                if(bpm){
-                    this.json.bpm = bpm;
-                    this.bpmLabel.text = "BPM " + bpm;
-                    this.save();
-                }else{
-                    alert("無効な数値です。");
-                }
-            }
-        }.bind(this)).setInteractive(true).addChildTo(this);
-        this.bpmLabel.on("pointover", function(){ this.fill = "#777"; }).on("pointout", function(){ this.fill = "black"; });
 
         this.initSongFileButton();
         this.initShortcutKey();
@@ -668,9 +612,7 @@ phina.define("MainScene", {
         this.tripletNotes.reset();
     },
     updateInformation: function() {
-        this.titleLabel.text = this.json.title;
-        this.artistLabel.text = "by " + this.json.artist;
-        this.bpmLabel.text = "BPM " + this.json.bpm;
+        // 現状は空
     },
     fullUpdate: function() {
         this.updateBarsCount();
@@ -797,10 +739,6 @@ phina.define("MainScene", {
                 if(!this.attackNotesCountOfBar[key][i]) this.attackNotesCountOfBar[key][i] = 0;
             }
         }, this);
-
-        this.titleLabel.text = this.json.title;
-        this.artistLabel.text = "by " + this.json.artist;
-        this.bpmLabel.text = "BPM " + this.json.bpm;
 
         console.timeEnd("import");
         this.fullUpdate();
