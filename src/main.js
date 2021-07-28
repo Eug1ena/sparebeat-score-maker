@@ -530,16 +530,6 @@ phina.define("MainScene", {
     update: function() {
         this.screenBottom.y = this.height;
         this.currentPos.height = this.height / 60;
-
-        // const domLeft = appCanvas.getBoundingClientRect().left;
-        // const domTop = appCanvas.getBoundingClientRect().top;
-        // const canvasWidth = appCanvas.getBoundingClientRect().width;
-        // const buttonWidth = 160;
-        // const buttonLeft = this.BUTTONS_X / SCREEN_WIDTH * canvasWidth - buttonWidth / 2;
-        //
-        // this.divDom.style.left = `${domLeft}px`;
-        // this.divDom.style.top = `${domTop}px`;
-        // this.songFileButton.style.left = `${buttonLeft}px`;
     },
     updateDencityGraph: function() {
         while (this.dencityGraph.children.length > this.notesCountOfBar[this.level].length) this.dencityGraph.children.last.remove();

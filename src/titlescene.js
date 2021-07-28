@@ -96,9 +96,20 @@ phina.define("TitleScene", {
             if(this.selectedIndex == 0) this.goToMainScene(undefined, null);
             else this.goToMainScene(this.selectedIndex - 1, saves[this.selectedIndex - 1].json);
         }.bind(this));
+
+        this.upperRight = DisplayElement({x: 0, y: 0}).addChildTo(this);
+        Label({
+            text: "Move - ↑ or ↓\nSelect - Space or Enter",
+            fontSize: 18,
+            fontFamily: "Nova Mono",
+            align: "left",
+            baseline: "top",
+            x: 20, y: 30
+        }).addChildTo(this.upperRight);
     },
     update: function() {
         this.center.y = this.height / 2;
+        // this.lowerRight.y = this.height;
     },
     goToMainScene: function(id, json) {
         shortcut.remove("Up");
