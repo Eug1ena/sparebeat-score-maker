@@ -9,11 +9,14 @@ phina.define("MetaSettingScene", {
 
 		const top = 120, margin = 60;
 
+		this.isEdited = false;
+
 		EditableLine(this, top + margin * 0, "タイトル", this.json.title, function(label) {
 			const ret = prompt("曲のタイトルを入力してください。", this.json.title);
 			if(ret){
 				this.json.title = ret;
 				label.text = ret;
+				this.isEdited = true;
             }
 		}.bind(this));
 		EditableLine(this, top + margin * 1, "アーティスト", this.json.artist, function(label) {
@@ -21,6 +24,7 @@ phina.define("MetaSettingScene", {
 			if(ret){
 				this.json.artist = ret;
 				label.text = ret;
+				this.isEdited = true;
             }
 		}.bind(this));
 		EditableLine(this, top + margin * 2, "BPM", this.json.bpm, function(label) {
@@ -30,6 +34,7 @@ phina.define("MetaSettingScene", {
 				if(bpm){
 					this.json.bpm = bpm;
 					label.text = bpm;
+					this.isEdited = true;
 				}else{
 					alert("無効な数値です。");
 				}
@@ -42,6 +47,7 @@ phina.define("MetaSettingScene", {
 				if(startTime){
 					this.json.startTime = startTime;
 					label.text = startTime;
+					this.isEdited = true;
 				}else{
 					alert("無効な数値です。");
 				}
@@ -52,6 +58,7 @@ phina.define("MetaSettingScene", {
 			if(ret){
 				this.json.level["easy"] = ret;
 				label.text = ret;
+				this.isEdited = true;
 			}
 		}.bind(this));
 		EditableLine(this, top + margin * 5, "レベル(Normal)", this.json.level["normal"], function(label) {
@@ -59,6 +66,7 @@ phina.define("MetaSettingScene", {
 			if(ret){
 				this.json.level["normal"] = ret;
 				label.text = ret;
+				this.isEdited = true;
 			}
 		}.bind(this));
 		EditableLine(this, top + margin * 6, "レベル(Hard)", this.json.level["hard"], function(label) {
@@ -66,6 +74,7 @@ phina.define("MetaSettingScene", {
 			if(ret){
 				this.json.level["hard"] = ret;
 				label.text = ret;
+				this.isEdited = true;
 			}
 		}.bind(this));
 
@@ -73,7 +82,7 @@ phina.define("MetaSettingScene", {
 	onpointstart: function() {
         if (this.childclicked) this.childclicked = false;
 		else {
-			this.main.save();
+			if (this.isEdited) this.main.save();
 			this.main.updateInformation();
 			this.exit();
 		}
