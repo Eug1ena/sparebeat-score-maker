@@ -7,6 +7,7 @@ phina.define("TitleScene", {
         const saves = JSON.parse(localStorage.getItem("saves") || "[]");
 
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
+        const group = List(true, 50, {y: -195}).addChildTo(this.center);
 
         this.chartElements = [];
         const newChartElem = RectangleShape({
@@ -16,60 +17,76 @@ phina.define("TitleScene", {
             y: -160,
             fill: "#ffd4f1",
             stroke: null
-        }).addChildTo(this.center);
-        this.chartElements.push(newChartElem);
+        }).addChildTo(group);
+        this.chartElements.push({elem: newChartElem});
         Label({
             x: 0, y: 0,
             text: "Create New Chart",
             fontSize: 25
         }).addChildTo(newChartElem);
 
-        for(let i = 0; i < saves.length; i++){
+        saves.forEach(function(chart, index) {
             const elem = RectangleShape({
                 width: SCREEN_WIDTH,
                 height: 150,
-                x: 0,
-                y: 200 * i,
-                fill: i === 0 ? "#ffb0e5" : "#ffd4f1",
+                fill: index === 0 ? "#ffb0e5" : "#ffd4f1",
                 stroke: null
-            }).addChildTo(this.center);
-            this.chartElements.push(elem);
+            }).addChildTo(group);
+            this.chartElements.push({elem: elem, number: index});
 
             Label({
                 x: 0, y: -20,
-                text: saves[i].json.title,
+                text: chart.json.title,
                 fontSize: 35
             }).addChildTo(elem);
             Label({
                 x: 0, y: 30,
-                text: "by " + saves[i].json.artist,
+                text: "by " + chart.json.artist,
                 fontSize: 25
             }).addChildTo(elem);
-        }
+
+            const deleteButton = Button({x: 400, y: 40, fill: "#524b4b", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(elem);
+            deleteButton.on("pointstart", function() {
+                if (window.confirm(chart.json.title + "を本当に削除しますか？")) {
+                    goUp();
+
+                    const item = this.chartElements.find(v => v.number === index);
+                    const indexInArray = this.chartElements.indexOf(item) - 1;
+                    saves.splice(indexInArray, 1);
+                    this.chartElements.splice(indexInArray + 1, 1);
+                    localStorage.setItem("saves", JSON.stringify(saves));
+
+                    console.log(indexInArray);
+
+                    const elem = item.elem;
+                    elem.remove();
+                }
+            }.bind(this));
+        }.bind(this));
         this.selectedIndex = this.chartElements.length == 1 ? 0 : 1;
 
-        shortcut.add("Up", function() {
+        const goUp = function() {
+            // console.log(this.chartElements);
             if(this.selectedIndex >= 1) {
-                this.chartElements[this.selectedIndex].fill = "#ffd4f1";
+                this.chartElements[this.selectedIndex].elem.fill = "#ffd4f1";
                 this.selectedIndex--;
-                this.chartElements[this.selectedIndex].fill = "#ffb0e5";
+                this.chartElements[this.selectedIndex].elem.fill = "#ffb0e5";
 
-                this.chartElements.forEach(function(v) {
-                    v.y += 200;
-                });
+                group.y += 200;
             }
-        }.bind(this));
-        shortcut.add("Down", function() {
+        }.bind(this);
+        const goDown = function() {
+            // console.log(this.chartElements);
             if(this.selectedIndex < this.chartElements.length - 1) {
-                this.chartElements[this.selectedIndex].fill = "#ffd4f1";
+                this.chartElements[this.selectedIndex].elem.fill = "#ffd4f1";
                 this.selectedIndex++;
-                this.chartElements[this.selectedIndex].fill = "#ffb0e5";
+                this.chartElements[this.selectedIndex].elem.fill = "#ffb0e5";
 
-                this.chartElements.forEach(function(v) {
-                    v.y -= 200;
-                });
+                group.y -= 200;
             }
-        }.bind(this));
+        }.bind(this);
+        shortcut.add("Up", goUp);
+        shortcut.add("Down", goDown);
 
         shortcut.add("Space", function() {
             if(this.selectedIndex == 0) this.goToMainScene(undefined, null);

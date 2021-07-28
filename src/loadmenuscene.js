@@ -15,7 +15,6 @@ phina.define("LoadMenuScene", {
                 }
             }).on("delete", function() {
                 this.childclicked = true;
-                console.log("ya");
                 saves.splice(index, 1);
                 localStorage.setItem("saves", JSON.stringify(saves));
                 if (main.id === index) main.id = undefined;
