@@ -9,6 +9,21 @@ phina.define("TitleScene", {
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
 
         this.chartElements = [];
+        const newChartElem = RectangleShape({
+            width: SCREEN_WIDTH,
+            height: 70,
+            x: 0,
+            y: -160,
+            fill: "#ffd4f1",
+            stroke: null
+        }).addChildTo(this.center);
+        this.chartElements.push(newChartElem);
+        Label({
+            x: 0, y: 0,
+            text: "Create New Chart",
+            fontSize: 25
+        }).addChildTo(newChartElem);
+
         for(let i = 0; i < saves.length; i++){
             const elem = RectangleShape({
                 width: SCREEN_WIDTH,
@@ -31,7 +46,7 @@ phina.define("TitleScene", {
                 fontSize: 25
             }).addChildTo(elem);
         }
-        this.selectedIndex = 0;
+        this.selectedIndex = this.chartElements.length == 1 ? 0 : 1;
 
         shortcut.add("Up", function() {
             if(this.selectedIndex >= 1) {
@@ -57,10 +72,12 @@ phina.define("TitleScene", {
         }.bind(this));
 
         shortcut.add("Space", function() {
-            this.goToMainScene(this.selectedIndex, saves[this.selectedIndex].json);
+            if(this.selectedIndex == 0) this.goToMainScene(undefined, null);
+            else this.goToMainScene(this.selectedIndex - 1, saves[this.selectedIndex - 1].json);
         }.bind(this));
         shortcut.add("Enter", function() {
-            this.goToMainScene(this.selectedIndex, saves[this.selectedIndex].json);
+            if(this.selectedIndex == 0) this.goToMainScene(undefined, null);
+            else this.goToMainScene(this.selectedIndex - 1, saves[this.selectedIndex - 1].json);
         }.bind(this));
     },
     update: function() {
