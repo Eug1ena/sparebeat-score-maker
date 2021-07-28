@@ -1,4 +1,4 @@
-# Sparebeat Score Maker
+# sparebeat-score-maker
 
 ~~アクセスはこちらから: [https://eug1ena.github.io/sparebeat-score-maker](https://eug1ena.github.io/sparebeat-score-maker)~~
 
