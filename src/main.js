@@ -47,8 +47,8 @@ phina.define("MainScene", {
         this.level = "normal";
         this.id = param.id;
         this.json = param.json || {
-            title: "Lorem Ipsum",
-            artist: "Dolor",
+            title: "タイトルなし",
+            artist: "アーティストなし",
             bpm: 158,
             startTime: 80,
             level: {
