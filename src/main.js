@@ -497,7 +497,7 @@ phina.define("MainScene", {
             else if (this.noteMeasure === 2) this.noteMeasure = 4;
 
             this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
-            this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+            this.updateCurrentLine();
 
             this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
             this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
@@ -591,8 +591,8 @@ phina.define("MainScene", {
         this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
 
         this.score.y = currentLineYInScreen - this.currentLine.y;
-        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
         this.updateCurrentLine();
+        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
 
         this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
         this.s.reset();
