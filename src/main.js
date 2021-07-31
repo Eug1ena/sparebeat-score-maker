@@ -557,8 +557,41 @@ phina.define("MainScene", {
             this.updateNoteMeasure();
         }.bind(this));
 
+        shortcut.add("T", this.toggleTripletVisibility.bind(this));
+
+        shortcut.add("R", this.changeNoteType.bind(this));
+
+        this.music = Music();
+        shortcut.add("L", function() {
+            if(!this.music.isSet()){
+                alert("音声を再生するには、Load Songボタンから音声ファイルを選択してください。");
+                return;
+            }
+            if(this.music.isPlaying()){
+                this.music.stop();
+            }else{
+                this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * (this.currentLinePos / 3));
+            }
+        }.bind(this));
+
+        shortcut.add("1", function() {
+            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 0);
+            else this.toggleNoteAt(this.currentLinePos / 3, 0);
+        }.bind(this));
+        shortcut.add("2", function() {
+            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 1);
+            else this.toggleNoteAt(this.currentLinePos / 3, 1);
+        }.bind(this));
+        shortcut.add("3", function() {
+            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 2);
+            else this.toggleNoteAt(this.currentLinePos / 3, 2);
+        }.bind(this));
+        shortcut.add("4", function() {
+            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 3);
+            else this.toggleNoteAt(this.currentLinePos / 3, 3);
+        }.bind(this));
+
         this.initSongFileButton();
-        this.initShortcutKey();
 
         this.import(this.json);
     },
@@ -847,49 +880,6 @@ phina.define("MainScene", {
         return json;
     },
 
-    initShortcutKey: function() {
-            shortcut.add("T", function() {
-                this.toggleTripletVisibility.bind(this)();
-            }.bind(this));
-
-            shortcut.add("R", function() {
-                this.changeNoteType();
-            }.bind(this));
-
-            this.music = Music();
-            shortcut.add("L", function() {
-                if(!this.music.isSet()){
-                    alert("音声を再生するには、Load Songボタンから音声ファイルを選択してください。");
-                    return;
-                }
-                if(this.music.isPlaying()){
-                    this.music.stop();
-                }else{
-                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * (this.currentLinePos / 3));
-                }
-            }.bind(this));
-
-            shortcut.add("1", function() {
-                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 0);
-                else this.toggleNoteAt(this.currentLinePos / 3, 0);
-            }.bind(this));
-            shortcut.add("2", function() {
-                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 1);
-                else this.toggleNoteAt(this.currentLinePos / 3, 1);
-            }.bind(this));
-            shortcut.add("3", function() {
-                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 2);
-                else this.toggleNoteAt(this.currentLinePos / 3, 2);
-            }.bind(this));
-            shortcut.add("4", function() {
-                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 3);
-                else this.toggleNoteAt(this.currentLinePos / 3, 3);
-            }.bind(this));
-
-            setInterval(function() {
-                const currentLineYInScreen = this.currentLine.y + this.score.y;
-            }.bind(this), 300);
-    },
     initSongFileButton: function() {
         const fileButton = document.createElement("input");
         fileButton.setAttribute("type", "file");
