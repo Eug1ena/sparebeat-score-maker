@@ -156,7 +156,9 @@ phina.define("MainScene", {
             }
             for (let j = 0; j < this.lengths[this.level].length; j++) {
                 if (this.lengths[this.level].sum[j] > i) {
-                    if (this.lengths[this.level].diff[j] % 4 === 0 && (i - (j === 0 ? 0 : this.lengths[this.level].sum[j - 1])) % 4 === 0) return PathShape({paths: [Vector2(-1000, 0), Vector2(1000, 0)], y: -1, strokeWidth: 1, stroke: "#cccccc"});
+                    if (this.lengths[this.level].diff[j] % 4 === 0 && (i - (j === 0 ? 0 : this.lengths[this.level].sum[j - 1])) % 4 === 0) {
+                        return PathShape({paths: [Vector2(-1000, 0), Vector2(1000, 0)], y: -1, strokeWidth: 1, stroke: "#cccccc"});
+                    }
                     return Element();
                 }
             }
@@ -186,17 +188,19 @@ phina.define("MainScene", {
             if (this.lengths[this.level].sum.includes(i)) {
                 Button({x: -140, y: 22, text: "+", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i);
-                    this.lengths[this.level].set(index, this.lengths[this.level].diff[index] + 1);
+                    this.lengths[this.level].set(index, this.lengths[this.level].diff[index] + 4);
                     this.notes.reset();
                     this.updateBarsCount();
+                    this.updateCurrentLine();
                     this.save();
                 }.bind(this)).addChildTo(root);
 
                 Button({x: -140, y: 66, text: "-", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i);
-                    this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 1);
+                    this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 4);
                     this.notes.reset();
                     this.updateBarsCount();
+                    this.updateCurrentLine();
                     this.save();
                 }.bind(this)).addChildTo(root);
             }
@@ -979,6 +983,8 @@ phina.define("MainScene", {
         this.currentLine.fill = colorOf(this.notetype);
     },
     updateCurrentLine: function() {
+        this.currentLinePos = Math.min(Math.max(this.currentLinePos, 0), this.lengths[this.level].sum.slice(-1) * 3 - 1);
+
         if (this.isTripletSelected) this.currentLine.height = this.NOTES_INTERVAL / 3 * 2;
         else this.currentLine.height = this.NOTES_INTERVAL;
 
