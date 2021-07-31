@@ -426,14 +426,12 @@ phina.define("MainScene", {
             else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this)).addChildTo(this);
         shortcut.add("O", function() {
-            if(this.level == "easy") updateDifficulty("hard");
-            else if(this.level == "normal") updateDifficulty("easy");
+            if(this.level == "normal") updateDifficulty("easy");
             else if(this.level == "hard") updateDifficulty("normal");
         }.bind(this));
         shortcut.add("P", function() {
             if(this.level == "easy") updateDifficulty("normal");
             else if(this.level == "normal") updateDifficulty("hard");
-            else if(this.level == "hard") updateDifficulty("easy");
         }.bind(this));
 
         // Button({text: "Load"}).setPosition(this.BUTTONS_X, 530).on("pointstart", function() {
