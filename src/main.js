@@ -505,7 +505,7 @@ phina.define("MainScene", {
         }.bind(this));
 
         shortcut.add("Up", function() {
-            if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1)){
+            if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1) * 3){
                 this.currentLinePos += this.noteMeasure;
             }
             this.updateCurrentLine();
@@ -517,21 +517,21 @@ phina.define("MainScene", {
             this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Shift+Up", function() {
-            if(this.currentLinePos + 16 < this.lengths[this.level].sum.slice(-1)){
-                this.currentLinePos += 16;
+            if(this.currentLinePos + 48 < this.lengths[this.level].sum.slice(-1) * 3){
+                this.currentLinePos += 48;
             }
             this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Shift+Down", function() {
-            if (this.currentLinePos >= 16) {
-                this.currentLinePos -= 16;
+            if (this.currentLinePos >= 48) {
+                this.currentLinePos -= 48;
             }else{
                 this.currentLinePos = 0;
             }
             this.updateCurrentLine();
         }.bind(this));
 
-        this.noteMeasure = 4;
+        this.noteMeasure = 12;
         this.noteMeasureLabel = Label({
             text: "Selected: 4th Note",
             fontSize: 24,
@@ -542,21 +542,19 @@ phina.define("MainScene", {
         }).addChildTo(this);
 
         shortcut.add("Left", function() {
-            if (this.noteMeasure === 1) this.noteMeasure = 2;
-            else if (this.noteMeasure === 2) this.noteMeasure = 4;
+            if (this.noteMeasure === 3 || this.noteMeasure === 2) this.noteMeasure = 6;
+            else if (this.noteMeasure === 6) this.noteMeasure = 12;
 
             this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
             this.updateCurrentLine();
 
-            this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
-            this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
+            this.updateNoteMeasure();
         }.bind(this));
         shortcut.add("Right", function() {
-            if (this.noteMeasure === 4) this.noteMeasure = 2;
-            else if (this.noteMeasure === 2) this.noteMeasure = 1;
+            if (this.noteMeasure === 12) this.noteMeasure = 6;
+            else if (this.noteMeasure === 6) this.noteMeasure = this.isTripletSelected ? 2 : 3;
 
-            this.noteMeasureLabel.text = "Selected: " + ["", "16th Note", "8th Note", "", "4th Note"][this.noteMeasure];
-            this.currentLine.width = ["", 260, 330, "", 400][this.noteMeasure];
+            this.updateNoteMeasure();
         }.bind(this));
 
         this.initSongFileButton();
@@ -637,7 +635,7 @@ phina.define("MainScene", {
 
         const currentLineYInScreen = this.currentLine.y + this.score.y;
         this.currentLine.height = this.NOTES_INTERVAL;
-        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL / 3;
 
         this.score.y = currentLineYInScreen - this.currentLine.y;
         this.updateCurrentLine();
@@ -867,21 +865,25 @@ phina.define("MainScene", {
                 if(this.music.isPlaying()){
                     this.music.stop();
                 }else{
-                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * this.currentLinePos);
+                    this.music.playAt(this.json.startTime + 60 * 1000 / this.json.bpm / 4 * (this.currentLinePos / 3));
                 }
             }.bind(this));
 
             shortcut.add("1", function() {
-                this.toggleNoteAt(this.currentLinePos, 0);
+                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 0);
+                else this.toggleNoteAt(this.currentLinePos / 3, 0);
             }.bind(this));
             shortcut.add("2", function() {
-                this.toggleNoteAt(this.currentLinePos, 1);
+                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 1);
+                else this.toggleNoteAt(this.currentLinePos / 3, 1);
             }.bind(this));
             shortcut.add("3", function() {
-                this.toggleNoteAt(this.currentLinePos, 2);
+                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 2);
+                else this.toggleNoteAt(this.currentLinePos / 3, 2);
             }.bind(this));
             shortcut.add("4", function() {
-                this.toggleNoteAt(this.currentLinePos, 3);
+                if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 3);
+                else this.toggleNoteAt(this.currentLinePos / 3, 3);
             }.bind(this));
 
             setInterval(function() {
@@ -925,16 +927,11 @@ phina.define("MainScene", {
     },
     toggleTripletVisibility: function() {
         this.isTripletSelected = !this.isTripletSelected;
+
+        this.updateCurrentLine();
+        this.updateNoteMeasure();
+
         this.fullUpdate();
-
-        // if (this.isTripletSelected) {
-        //     this.tripletNotes.show();
-        //     this.notes.hide();
-        // } else {
-        //     this.tripletNotes.hide();
-        //     this.notes.show();
-        // }
-
     },
     toggleNoteAt: function(i, lane) {
         if (this.isTripletSelected) return;
@@ -992,13 +989,21 @@ phina.define("MainScene", {
         this.currentLine.fill = colorOf(this.notetype);
     },
     updateCurrentLine: function() {
-        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL;
+        if (this.isTripletSelected) this.currentLine.height = this.NOTES_INTERVAL / 3 * 2;
+        else this.currentLine.height = this.NOTES_INTERVAL;
+
+        this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
 
         if(this.score.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
             this.score.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
         }else if(this.score.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
             this.score.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
         }
+        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
+    },
+    updateNoteMeasure: function() {
+        this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note"}[this.noteMeasure];
+        this.currentLine.width = {2: 260, 3: 260, 6: 330, 12: 400}[this.noteMeasure];
     }
 });
 
