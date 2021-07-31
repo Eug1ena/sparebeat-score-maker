@@ -191,18 +191,21 @@ phina.define("MainScene", {
                 Button({x: -140, y: 22, text: "+", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i);
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] + 4);
+
                     this.notes.reset();
                     this.updateBarsCount();
-                    this.updateCurrentLine();
                     this.save();
                 }.bind(this)).addChildTo(root);
 
                 Button({x: -140, y: 66, text: "-", width: 36, height: 36}).on("pointstart", function() {
                     const index = this.lengths[this.level].sum.indexOf(i);
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 4);
+
+                    this.currentLinePos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
+                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+                    this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
                     this.notes.reset();
                     this.updateBarsCount();
-                    this.updateCurrentLine();
                     this.save();
                 }.bind(this)).addChildTo(root);
             }
