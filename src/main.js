@@ -38,6 +38,14 @@ function colorOf(id, mode) {
     else if (id === LONG_END) return mode ? '#118888' : '#00aaaa';
 }
 
+function lightColorOf(id) {
+    if (id === NOTHING) return '#666666';
+    else if (id === NORMAL) return '#7777dd';
+    else if (id === ATTACK) return '#cc6666';
+    else if (id === LONG_START) return '#cccc44';
+    else if (id === LONG_END) return '#44cccc';
+}
+
 // やっぱりコードが汚い… 自分で言うのもアレですがいっそ書き直した方がいいような気がしている
 phina.define("MainScene", {
     superClass: "phina.display.DisplayScene",
@@ -84,6 +92,8 @@ phina.define("MainScene", {
         this.noteButtons = []; // 3連符でない音符のボタンを表す表
         this.tripletNoteButtons = { easy: [], normal: [], hard: []}; // 3連符である音符のボタンを表す表
 
+        this.isTripletSelected = false;
+
         // この4つはクラスにまとめるべきか
         this.notesCount = { easy: 0, normal: 0, hard: 0}; // 譜面全体のノーツ数
         this.notesCountOfBar = { easy: [], normal: [], hard: []}; // 小節ごとのノーツ数
@@ -97,7 +107,6 @@ phina.define("MainScene", {
         this.dencityGraph = DisplayElement({y: -9}).addChildTo(this.screenBottom);
         this.dencityGraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
-        // Label({x: 68, y: -40, fontSize: 12, text: "10notes/s"}).addChildTo(this.screenBottom);
         this.notesCountOfBar.forIn(function(k, v) {v.fill(0, 0, BARS_COUNT_INITIAL)});
         this.attackNotesCountOfBar.forIn(function(k, v) {v.fill(0, 0, BARS_COUNT_INITIAL)});
         this.currentPos = RectangleShape({
@@ -154,6 +163,15 @@ phina.define("MainScene", {
             return Element();
         }.bind(this), Vector2(0, -this.NOTES_INTERVAL)).addChildTo(this.score);
 
+        const getNotesData = function(level, i, lane) {
+            if (!this.notesData[this.level][i]) return NOTHING;
+            return this.notesData[this.level][i][lane];
+        }.bind(this);
+        const getTripletNotesData = function(level, i, lane) {
+            if (!this.tripletNotesData[this.level][i]) return NOTHING;
+            return this.tripletNotesData[this.level][i][lane];
+        }.bind(this);
+
         this.notes = InfiniteOf(function(i) {
             if (!this.notesData[this.level][i]) {
                 this.notesData[this.level][i] = [NOTHING, NOTHING, NOTHING, NOTHING];
@@ -184,9 +202,24 @@ phina.define("MainScene", {
             const group = DisplayElement({width: 225, height: 28, y: -this.NOTES_INTERVAL / 2}).addChildTo(root);
             const self = this;
             if(LANES.some(function (lane) {
-                return this.tripletNotesData[this.level][Math.floor(i / 2) * 3] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 1][lane] !== NOTHING || this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2] && this.tripletNotesData[this.level][Math.floor(i / 2) * 3 + 2][lane] !== NOTHING;
-            }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
+                return getTripletNotesData(this.level, Math.floor(i / 2) * 3, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 1, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 2, lane) !== NOTHING;
+            }, this)){
+                for (let j = 0; j < 4; j++) {
+                    // RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
+                }
+            }
             else {
+                if (this.isTripletSelected) {
+                    if (LANES.some(function (lane) {
+                        return getNotesData(this.level, Math.floor(i / 2) * 2, lane) !== NOTHING || getNotesData(this.level, Math.floor(i / 2) * 2 + 1, lane) !== NOTHING;
+                    }, this)) {
+                        for (let j = 0; j < 4; j++) {
+                            const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL - 5, fill: lightColorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                            self.noteButtons[i][j] = key;
+                        }
+                    }
+                    return root;
+                }
                 if (this.newZone) {
                     group.on("pointover", function() {this.setScale(1.1)})
                     .on("pointout", function() {this.setScale(1)})
@@ -235,9 +268,25 @@ phina.define("MainScene", {
             const group = DisplayElement({width: 225, height: 18, y: -this.NOTES_INTERVAL / 3}).addChildTo(root);
             const self = this;
             if (LANES.some(function (lane) {
-                return this.notesData[this.level][Math.floor(i / 3) * 2] && this.notesData[this.level][Math.floor(i / 3) * 2][lane] !== NOTHING || this.notesData[this.level][Math.floor(i / 3) * 2 + 1] && this.notesData[this.level][Math.floor(i / 3) * 2 + 1][lane] !== NOTHING;
-            }, this)) for (let j = 0; j < 4; j++) RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: "#666666", stroke: null}).addChildTo(group);
+                return getNotesData(this.level, Math.floor(i / 3) * 2, lane) !== NOTHING || getNotesData(this.level, Math.floor(i / 3) * 2 + 1, lane) !== NOTHING;
+            }, this)) {
+                for (let j = 0; j < 4; j++) {
+                    // RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: "#666666", stroke: null}).addChildTo(group);
+                }
+            }
             else {
+                if (!this.isTripletSelected) {
+                    if (LANES.some(function (lane) {
+                        return getTripletNotesData(this.level, Math.floor(i / 3) * 3, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 3) * 3 + 1, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 3) * 3 + 2, lane) !== NOTHING;
+                    }, this)) {
+                        for (let j = 0; j < 4; j++) {
+                            const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: lightColorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
+                            self.tripletNoteButtons[i][j] = key;
+                        }
+                    }
+                    return root;
+                }
+
                 if (this.newZone) {
                     group.on("pointover", group.setScale.bind(group, 1.1))
                     .on("pointout", group.setScale.bind(group, 1))
@@ -271,7 +320,7 @@ phina.define("MainScene", {
                 }
             }
             return root;
-        }.bind(this), Vector2(0, this.s.pitch.y / 3 * 2), {x: 120}).hide().addChildTo(this.score);
+        }.bind(this), Vector2(0, this.s.pitch.y / 3 * 2), {x: 0}).addChildTo(this.score);
 
         this.notesCountLabel = Label({
             text: "0 Notes\n0 Attack Notes\n0.00 Notes Per Second",
@@ -875,12 +924,20 @@ phina.define("MainScene", {
         }.bind(this));
     },
     toggleTripletVisibility: function() {
-        this.tripletNotes.visible = !this.tripletNotes.visible;
-        this.notes.x = this.tripletNotes.visible ? -120 : 0;
+        this.isTripletSelected = !this.isTripletSelected;
+        this.fullUpdate();
 
-        this.currentLine.x = this.tripletNotes.visible ? -120 : 0;
+        // if (this.isTripletSelected) {
+        //     this.tripletNotes.show();
+        //     this.notes.hide();
+        // } else {
+        //     this.tripletNotes.hide();
+        //     this.notes.show();
+        // }
+
     },
     toggleNoteAt: function(i, lane) {
+        if (this.isTripletSelected) return;
         if (this.notesData[this.level][i][lane]) {
             this.notesCount[this.level]--;
             this.notesCountOfBar[this.level][Math.floor(i / 16)]--;
@@ -904,27 +961,28 @@ phina.define("MainScene", {
         this.tripletNotes.reset();
     },
     toggleTripletNoteAt: function(i, lane) {
-            if (this.tripletNotesData[this.level][i][lane]) {
-                this.notesCount[this.level]--;
-                this.notesCountOfBar[this.level][Math.floor(i / 24)]--;
-                if (this.tripletNotesData[this.level][i][lane] === ATTACK) {
-                    this.attackNotesCount[this.level]--;
-                    this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]--;
-                }
-                this.tripletNotesData[this.level][i][lane] = NOTHING;
-            } else {
-                this.notesCount[this.level]++;
-                this.notesCountOfBar[this.level][Math.floor(i / 24)]++;
-                if (this.notetype === ATTACK) {
-                    this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]++;
-                    this.attackNotesCount[this.level]++;
-                }
-                this.tripletNotesData[this.level][i][lane] = this.notetype;
+        if (!this.isTripletSelected) return;
+        if (this.tripletNotesData[this.level][i][lane]) {
+            this.notesCount[this.level]--;
+            this.notesCountOfBar[this.level][Math.floor(i / 24)]--;
+            if (this.tripletNotesData[this.level][i][lane] === ATTACK) {
+                this.attackNotesCount[this.level]--;
+                this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]--;
             }
-            this.tripletNoteButtons[i][lane].fill = colorOf(this.tripletNotesData[this.level][i][lane]);
-            this.updateNotesCount();
-            this.save();
-            this.notes.reset();
+            this.tripletNotesData[this.level][i][lane] = NOTHING;
+        } else {
+            this.notesCount[this.level]++;
+            this.notesCountOfBar[this.level][Math.floor(i / 24)]++;
+            if (this.notetype === ATTACK) {
+                this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]++;
+                this.attackNotesCount[this.level]++;
+            }
+            this.tripletNotesData[this.level][i][lane] = this.notetype;
+        }
+        this.tripletNoteButtons[i][lane].fill = colorOf(this.tripletNotesData[this.level][i][lane]);
+        this.updateNotesCount();
+        this.save();
+        this.notes.reset();
     },
     changeNoteType: function() {
         if (++this.notetype > LONG_END) this.notetype = NORMAL;
