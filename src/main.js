@@ -69,6 +69,7 @@ phina.define("MainScene", {
 
         this.NOTES_INTERVAL = 30;
         shortcut.add("Ctrl+Shift+Up", function() {
+            if(this.NOTES_INTERVAL == 35) this.NOTES_INTERVAL = 40;
             if(this.NOTES_INTERVAL == 30) this.NOTES_INTERVAL = 35;
             if(this.NOTES_INTERVAL == 25) this.NOTES_INTERVAL = 30;
             if(this.NOTES_INTERVAL == 20) this.NOTES_INTERVAL = 25;
@@ -79,6 +80,7 @@ phina.define("MainScene", {
             if(this.NOTES_INTERVAL == 25) this.NOTES_INTERVAL = 20;
             if(this.NOTES_INTERVAL == 30) this.NOTES_INTERVAL = 25;
             if(this.NOTES_INTERVAL == 35) this.NOTES_INTERVAL = 30;
+            if(this.NOTES_INTERVAL == 40) this.NOTES_INTERVAL = 35;
 
             this.updateNotesInterval();
         }.bind(this));
