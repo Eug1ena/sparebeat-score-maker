@@ -181,6 +181,7 @@ phina.define("MainScene", {
             if (!this.noteButtons[i]) {
                 this.noteButtons[i] = [null, null, null, null];
             }
+
             const root = DisplayElement();
             if (this.lengths[this.level].sum.includes(i)) {
                 Button({x: -140, y: 22, text: "+", width: 36, height: 36}).on("pointstart", function() {
@@ -199,27 +200,19 @@ phina.define("MainScene", {
                     this.save();
                 }.bind(this)).addChildTo(root);
             }
+
             const group = DisplayElement({width: 225, height: 28, y: -this.NOTES_INTERVAL / 2}).addChildTo(root);
             const self = this;
+            if (this.isTripletSelected) return root;
+
             if(LANES.some(function (lane) {
                 return getTripletNotesData(this.level, Math.floor(i / 2) * 3, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 1, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 2, lane) !== NOTHING;
             }, this)){
                 for (let j = 0; j < 4; j++) {
-                    // RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
+                    RectangleShape({x: j * 60 - 90, width: 50, height: 25, fill: "#666666", stroke: null}).addChildTo(group);
                 }
             }
             else {
-                if (this.isTripletSelected) {
-                    if (LANES.some(function (lane) {
-                        return getNotesData(this.level, Math.floor(i / 2) * 2, lane) !== NOTHING || getNotesData(this.level, Math.floor(i / 2) * 2 + 1, lane) !== NOTHING;
-                    }, this)) {
-                        for (let j = 0; j < 4; j++) {
-                            const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL - 5, fill: lightColorOf(this.notesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
-                            self.noteButtons[i][j] = key;
-                        }
-                    }
-                    return root;
-                }
                 if (this.newZone) {
                     group.on("pointover", function() {this.setScale(1.1)})
                     .on("pointout", function() {this.setScale(1)})
@@ -264,29 +257,21 @@ phina.define("MainScene", {
             if (!this.tripletNoteButtons[i]) {
                 this.tripletNoteButtons[i] = [null, null, null, null];
             }
+
             const root = DisplayElement();
             const group = DisplayElement({width: 225, height: 18, y: -this.NOTES_INTERVAL / 3}).addChildTo(root);
             const self = this;
+
+            if (!this.isTripletSelected) return root;
+
             if (LANES.some(function (lane) {
                 return getNotesData(this.level, Math.floor(i / 3) * 2, lane) !== NOTHING || getNotesData(this.level, Math.floor(i / 3) * 2 + 1, lane) !== NOTHING;
             }, this)) {
                 for (let j = 0; j < 4; j++) {
-                    // RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: "#666666", stroke: null}).addChildTo(group);
+                    RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: "#666666", stroke: null}).addChildTo(group);
                 }
             }
             else {
-                if (!this.isTripletSelected) {
-                    if (LANES.some(function (lane) {
-                        return getTripletNotesData(this.level, Math.floor(i / 3) * 3, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 3) * 3 + 1, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 3) * 3 + 2, lane) !== NOTHING;
-                    }, this)) {
-                        for (let j = 0; j < 4; j++) {
-                            const key = RectangleShape({x: j * 60 - 90, width: 50, height: this.NOTES_INTERVAL / 2, fill: lightColorOf(this.tripletNotesData[this.level][i][j], this.newZone), stroke: null}).addChildTo(group);
-                            self.tripletNoteButtons[i][j] = key;
-                        }
-                    }
-                    return root;
-                }
-
                 if (this.newZone) {
                     group.on("pointover", group.setScale.bind(group, 1.1))
                     .on("pointout", group.setScale.bind(group, 1))
@@ -918,11 +903,23 @@ phina.define("MainScene", {
     toggleTripletVisibility: function() {
         this.isTripletSelected = !this.isTripletSelected;
 
-        this.updateCurrentLine();
+        if (this.noteMeasure === 3) {
+            this.noteMeasure = 2;
 
-        if (this.noteMeasure === 3) this.noteMeasure = 2;
-        else if (this.noteMeasure === 2) this.noteMeasure = 3;
+            if (this.currentLinePos % 6 === 3) {
+                this.currentLinePos = Math.floor(this.currentLinePos / 6) * 6 + 4;
+            }
+        } else if (this.noteMeasure === 2) {
+            this.noteMeasure = 3;
+
+            if (this.currentLinePos % 6 === 2) {
+                this.currentLinePos = Math.floor(this.currentLinePos / 6) * 6;
+            } else if (this.currentLinePos % 6 === 4) {
+                this.currentLinePos = Math.floor(this.currentLinePos / 6) * 6 + 3;
+            }
+        }
         this.updateNoteMeasure();
+        this.updateCurrentLine();
 
         this.fullUpdate();
     },
