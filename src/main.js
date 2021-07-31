@@ -202,7 +202,8 @@ phina.define("MainScene", {
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 4);
 
                     this.currentLinePos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
-                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.
+                    noteMeasure;
                     this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
                     this.notes.reset();
                     this.updateBarsCount();
@@ -520,6 +521,22 @@ phina.define("MainScene", {
             }else{
                 this.currentLinePos = 0;
             }
+            this.updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Ctrl+Up", function() {
+            this.currentLinePos = Math.max(this.currentLinePos, this.lengths[this.level].sum.slice(-2, -1) * 3);
+            this.updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Meta+Up", function() {
+            this.currentLinePos = Math.max(this.currentLinePos, this.lengths[this.level].sum.slice(-2, -1) * 3);
+            this.updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Ctrl+Down", function() {
+            this.currentLinePos = 0;
+            this.updateCurrentLine();
+        }.bind(this));
+        shortcut.add("Meta+Down", function() {
+            this.currentLinePos = 0;
             this.updateCurrentLine();
         }.bind(this));
 
