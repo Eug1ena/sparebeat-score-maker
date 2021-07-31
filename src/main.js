@@ -919,6 +919,9 @@ phina.define("MainScene", {
         this.isTripletSelected = !this.isTripletSelected;
 
         this.updateCurrentLine();
+
+        if (this.noteMeasure === 3) this.noteMeasure = 2;
+        else if (this.noteMeasure === 2) this.noteMeasure = 3;
         this.updateNoteMeasure();
 
         this.fullUpdate();
