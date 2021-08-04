@@ -215,6 +215,10 @@ phina.define("MainScene", {
             const self = this;
             if (this.isTripletSelected) return root;
 
+            if (i < 0 || i >= this.lengths[this.level].sum.slice(-1)) {
+                return root;
+            }
+
             if(LANES.some(function (lane) {
                 return getTripletNotesData(this.level, Math.floor(i / 2) * 3, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 1, lane) !== NOTHING || getTripletNotesData(this.level, Math.floor(i / 2) * 3 + 2, lane) !== NOTHING;
             }, this)){
@@ -273,6 +277,10 @@ phina.define("MainScene", {
             const self = this;
 
             if (!this.isTripletSelected) return root;
+
+            if (i < 0 || Math.floor(i / 3) * 2 >= this.lengths[this.level].sum.slice(-1)) {
+                return root;
+            }
 
             if (LANES.some(function (lane) {
                 return getNotesData(this.level, Math.floor(i / 3) * 2, lane) !== NOTHING || getNotesData(this.level, Math.floor(i / 3) * 2 + 1, lane) !== NOTHING;
@@ -892,7 +900,7 @@ phina.define("MainScene", {
     initSongFileButton: function() {
         const fileButton = document.createElement("input");
         fileButton.setAttribute("type", "file");
-        fileButton.setAttribute("accept", ".mp3,.m4a,.aac,.wav,.flac");
+        fileButton.setAttribute("accept", "audio/*");
 
         const visibleButton = Button({
             text: "Load Song",
