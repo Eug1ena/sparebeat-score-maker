@@ -17,6 +17,8 @@ phina.ui.Button.defaults.$extend({
     fontSize: 24
 });
 
+const LINE_Y = 200;
+
 const BARS_COUNT_INITIAL = 100;
 
 const NOTHING = 0;
@@ -105,7 +107,7 @@ phina.define("MainScene", {
 
         this.lengths = { easy: Lengths(), normal: Lengths(), hard: Lengths()};
         this.screenBottom = DisplayElement({y: this.height}).addChildTo(this);
-        this.score = DisplayElement({x: SCREEN_CENTER_X}).addChildTo(this.screenBottom);
+        this.score = DisplayElement({x: SCREEN_CENTER_X, y: -LINE_Y + 15}).addChildTo(this.screenBottom);
         this.dencityGraph = DisplayElement({y: -9}).addChildTo(this.screenBottom);
         this.dencityGraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
@@ -202,9 +204,9 @@ phina.define("MainScene", {
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 4);
 
                     this.currentLinePos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
-                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.
-                    noteMeasure;
-                    this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
+                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+                    this.updateCurrentLine();
+                    // this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
                     this.notes.reset();
                     this.updateBarsCount();
                     this.save();
@@ -468,19 +470,19 @@ phina.define("MainScene", {
         });
 
         this.on("enter", function(e) {
-            e.app.domElement.addEventListener("wheel", function(e) {
-                // e.deltaMode は 0なら1が1px、1なら1が1行であることを意味する
-                this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
-                this.updateGraphY();
-            }.bind(this));
-            e.app.domElement.addEventListener("dragover", function(event) {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "copy";
-            });
-            e.app.domElement.addEventListener("drop", function(event) {
-                event.preventDefault();
-                importFile(event.dataTransfer.files[0]);
-            });
+            // e.app.domElement.addEventListener("wheel", function(e) {
+            //     // e.deltaMode は 0なら1が1px、1なら1が1行であることを意味する
+            //     this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
+            //     this.updateGraphY();
+            // }.bind(this));
+            // e.app.domElement.addEventListener("dragover", function(event) {
+            //     event.preventDefault();
+            //     event.dataTransfer.dropEffect = "copy";
+            // });
+            // e.app.domElement.addEventListener("drop", function(event) {
+            //     event.preventDefault();
+            //     importFile(event.dataTransfer.files[0]);
+            // });
         });
 
         document.getElementById("export").addEventListener("click", function() {
@@ -683,13 +685,13 @@ phina.define("MainScene", {
         this.extend.y = 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
         this.cut.y = 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
 
-        const currentLineYInScreen = this.currentLine.y + this.score.y;
+        // const currentLineYInScreen = this.currentLine.y + this.score.y;
         this.currentLine.height = this.NOTES_INTERVAL;
-        this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL / 3;
+        // this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL / 3;
 
-        this.score.y = currentLineYInScreen - this.currentLine.y;
+        // this.score.y = currentLineYInScreen - this.currentLine.y;
         this.updateCurrentLine();
-        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
+        // this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
 
         this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
         this.s.reset();
@@ -1016,14 +1018,18 @@ phina.define("MainScene", {
         if (this.isTripletSelected) this.currentLine.height = this.NOTES_INTERVAL / 3 * 2;
         else this.currentLine.height = this.NOTES_INTERVAL;
 
-        this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
+        this.score.y = -LINE_Y + (this.currentLinePos / 3) * this.NOTES_INTERVAL + (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
 
-        if(this.score.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
-            this.score.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
-        }else if(this.score.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
-            this.score.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
-        }
-        this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
+        this.currentLine.y = -this.score.y + -LINE_Y;
+
+        // this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
+
+        // if(this.score.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
+        //     this.score.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
+        // }else if(this.score.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
+        //     this.score.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
+        // }
+        // this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
     },
     updateNoteMeasure: function() {
         this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note"}[this.noteMeasure];
