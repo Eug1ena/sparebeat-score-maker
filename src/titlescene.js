@@ -106,6 +106,17 @@ phina.define("TitleScene", {
             baseline: "top",
             x: 20, y: 30
         }).addChildTo(this.upperRight);
+
+        this.on("enter", function(e) {
+            // e.app.domElement.addEventListener("dragover", function(event) {
+            //     event.preventDefault();
+            //     event.dataTransfer.dropEffect = "copy";
+            // });
+            e.app.domElement.addEventListener("drop", function(event) {
+                event.preventDefault();
+                importFile(event.dataTransfer.files[0]);
+            });
+        });
     },
     update: function() {
         this.center.y = this.height / 2;

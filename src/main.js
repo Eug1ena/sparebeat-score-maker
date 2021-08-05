@@ -469,22 +469,6 @@ phina.define("MainScene", {
             importFile(event.target.files[0]);
         });
 
-        this.on("enter", function(e) {
-            // e.app.domElement.addEventListener("wheel", function(e) {
-            //     // e.deltaMode は 0なら1が1px、1なら1が1行であることを意味する
-            //     this.score.y = Math.min(Math.max(this.score.y - e.deltaY * (e.deltaMode === 1 ? 35 : 1), 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
-            //     this.updateGraphY();
-            // }.bind(this));
-            // e.app.domElement.addEventListener("dragover", function(event) {
-            //     event.preventDefault();
-            //     event.dataTransfer.dropEffect = "copy";
-            // });
-            // e.app.domElement.addEventListener("drop", function(event) {
-            //     event.preventDefault();
-            //     importFile(event.dataTransfer.files[0]);
-            // });
-        });
-
         document.getElementById("export").addEventListener("click", function() {
             const json = this.export();
             console.time("copy");
@@ -514,23 +498,7 @@ phina.define("MainScene", {
             this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Down", function() {
-            if (this.currentLinePos >= this.noteMeasure) {
-                this.currentLinePos -= this.noteMeasure;
-            }
-            this.updateCurrentLine();
-        }.bind(this));
-        shortcut.add("Shift+Up", function() {
-            if(this.currentLinePos + 48 < this.lengths[this.level].sum.slice(-1) * 3){
-                this.currentLinePos += 48;
-            }
-            this.updateCurrentLine();
-        }.bind(this));
-        shortcut.add("Shift+Down", function() {
-            if (this.currentLinePos >= 48) {
-                this.currentLinePos -= 48;
-            }else{
-                this.currentLinePos = 0;
-            }
+            this.currentLinePos = Math.max(this.currentLinePos - this.noteMeasure, 0);
             this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Ctrl+Up", function() {
@@ -563,14 +531,16 @@ phina.define("MainScene", {
         shortcut.add("Left", function() {
             if (this.noteMeasure === 3 || this.noteMeasure === 2) this.noteMeasure = 6;
             else if (this.noteMeasure === 6) this.noteMeasure = 12;
+            else if (this.noteMeasure === 12) this.noteMeasure = 48;
 
-            this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+            if (this.noteMeasure !== 48) this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
             this.updateCurrentLine();
 
             this.updateNoteMeasure();
         }.bind(this));
         shortcut.add("Right", function() {
-            if (this.noteMeasure === 12) this.noteMeasure = 6;
+            if (this.noteMeasure === 48) this.noteMeasure = 12;
+            else if (this.noteMeasure === 12) this.noteMeasure = 6;
             else if (this.noteMeasure === 6) this.noteMeasure = this.isTripletSelected ? 2 : 3;
 
             this.updateNoteMeasure();
@@ -685,13 +655,9 @@ phina.define("MainScene", {
         this.extend.y = 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
         this.cut.y = 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16;
 
-        // const currentLineYInScreen = this.currentLine.y + this.score.y;
         this.currentLine.height = this.NOTES_INTERVAL;
-        // this.currentLine.y = -this.NOTES_INTERVAL / 2 - this.currentLinePos * this.NOTES_INTERVAL / 3;
 
-        // this.score.y = currentLineYInScreen - this.currentLine.y;
         this.updateCurrentLine();
-        // this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
 
         this.s.pitch = Vector2(0, -this.NOTES_INTERVAL);
         this.s.reset();
@@ -1021,19 +987,10 @@ phina.define("MainScene", {
         this.score.y = -LINE_Y + (this.currentLinePos / 3) * this.NOTES_INTERVAL + (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
 
         this.currentLine.y = -this.score.y + -LINE_Y;
-
-        // this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
-
-        // if(this.score.y < -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2){
-        //     this.score.y = -this.currentLine.y - this.height + this.NOTES_INTERVAL / 2;
-        // }else if(this.score.y > -this.currentLine.y - this.NOTES_INTERVAL / 2){
-        //     this.score.y = -this.currentLine.y - this.NOTES_INTERVAL / 2;
-        // }
-        // this.score.y = Math.min(Math.max(this.score.y, 0), -this.notes.pitch.y * this.lengths[this.level].totalBarsCount - this.height);
     },
     updateNoteMeasure: function() {
-        this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note"}[this.noteMeasure];
-        this.currentLine.width = {2: 260, 3: 260, 6: 330, 12: 400}[this.noteMeasure];
+        this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note", 48: "Whole Note"}[this.noteMeasure];
+        this.currentLine.width = {2: 260, 3: 260, 6: 330, 12: 400, 48: 430}[this.noteMeasure];
     }
 });
 
