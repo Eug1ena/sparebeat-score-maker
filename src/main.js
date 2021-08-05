@@ -465,6 +465,9 @@ phina.define("MainScene", {
             fileReader.readAsText(file);
         }.bind(this);
 
+        document.getElementById("import-label").style.display = "block";
+        document.getElementById("export").style.display = "inline-block";
+
         document.getElementById("import").addEventListener("change", function(event) {
             importFile(event.target.files[0]);
         });
