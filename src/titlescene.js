@@ -98,25 +98,37 @@ phina.define("TitleScene", {
         }.bind(this));
 
         this.upperRight = DisplayElement({x: 0, y: 0}).addChildTo(this);
-        Label({
+        const instructionLabel = Label({
             text: "Move - ↑ or ↓\nSelect - Space or Enter",
             fontSize: 18,
             fontFamily: "Nova Mono",
             align: "left",
             baseline: "top",
             x: 20, y: 30
-        }).addChildTo(this.upperRight);
-
-        this.on("enter", function(e) {
-            // e.app.domElement.addEventListener("dragover", function(event) {
-            //     event.preventDefault();
-            //     event.dataTransfer.dropEffect = "copy";
-            // });
-            e.app.domElement.addEventListener("drop", function(event) {
-                event.preventDefault();
-                importFile(event.dataTransfer.files[0]);
-            });
         });
+
+        WebFont.load({
+            custom: {
+                families: ["Nova Mono"]
+            },
+            active: function() {
+                instructionLabel.addChildTo(this.upperRight);
+            }.bind(this),
+            inactive: function() {
+                instructionLabel.addChildTo(this.upperRight);
+            }.bind(this)
+        });
+
+        // this.on("enter", function(e) {
+        //     e.app.domElement.addEventListener("dragover", function(event) {
+        //         event.preventDefault();
+        //         event.dataTransfer.dropEffect = "copy";
+        //     });
+        //     e.app.domElement.addEventListener("drop", function(event) {
+        //         event.preventDefault();
+        //         importFile(event.dataTransfer.files[0]);
+        //     });
+        // });
     },
     update: function() {
         this.center.y = this.height / 2;
