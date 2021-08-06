@@ -714,7 +714,7 @@ phina.define("MainScene", {
                 this.attackNotesCountOfBar[key][Math.floor(ii / 16)]++;
             }
         }.bind(this);
-        console.time("import");
+
         this.json = score;
         this.json.map.forIn(function(key, value) {
             console.log("importing " + key)
@@ -726,9 +726,11 @@ phina.define("MainScene", {
             this.attackNotesCountOfBar[key] = [];
             this.lengths[key].clear();
             var ii = 0, ij = 0, nextTriplet = -1;
-            for (var i = 0; i < value.length; i++) {
+            for (let i = 0; i < value.length; i++) {
                 value[i] = value[i].split(",");
-                for (var j = 0, jj = 0; j < value[i].length; j++) {
+
+                let barlen = 0;
+                for (let j = 0; j < value[i].length; j++) {
                     this.notesData[key][ii] = [NOTHING, NOTHING, NOTHING, NOTHING];
                     this.notesData[key][ii].bind = NOTHING;
                     this.notesData[key][ii].random = NOTHING;
@@ -762,7 +764,7 @@ phina.define("MainScene", {
                                 }
                             }
                             if (tripletEnd) {
-                                jj++;
+                                barlen++;
                                 ii++;
                                 ij += 2;
                                 break;
@@ -770,7 +772,7 @@ phina.define("MainScene", {
                             j++;
                             ii += 2 / 3;
                         }
-                        jj += k / 3 * 2;
+                        barlen += k / 3 * 2;
                         ij += k * 2;
                         ii = Math.round(ii);
                     } else {
@@ -783,22 +785,21 @@ phina.define("MainScene", {
                             }
                         }
                         ii++;
-                        jj++;
+                        barlen++;
                         ij += 3;
                     }
                 }
-                this.lengths[key].push(Math.round(jj));
+                this.lengths[key].push(Math.round(barlen));
             }
-            for (;i < 5; i++) this.lengths[key].push(16);
+            for (let i = value.length; i < BARS_COUNT_INITIAL; i++) this.lengths[key].push(16);
 
-            this.barsCount[key] = Math.max(i, BARS_COUNT_INITIAL);
-            for(let i = 0; i < Math.max(this.notesCountOfBar[key].length, BARS_COUNT_INITIAL); i++) {
+            this.barsCount[key] = Math.max(value.length, BARS_COUNT_INITIAL);
+            for (let i = 0; i < Math.max(this.notesCountOfBar[key].length, BARS_COUNT_INITIAL); i++) {
                 if(!this.notesCountOfBar[key][i]) this.notesCountOfBar[key][i] = 0;
                 if(!this.attackNotesCountOfBar[key][i]) this.attackNotesCountOfBar[key][i] = 0;
             }
         }, this);
 
-        console.timeEnd("import");
         this.fullUpdate();
     },
     export: function() {
@@ -813,11 +814,13 @@ phina.define("MainScene", {
             if (data === END) return {bind: "]", random: "}"}[lane];
             throw new Error("invaild data: " + data);
         }
-        // console.time("export");
+
         ["easy", "normal", "hard"].each(function(level) {
+            const validBarsCount = this.findLastBarHavingNotes(level) + 1;
+
             this.json.map[level] = [];
             let putrightparenthese = false;
-            for (let i = 0; i < this.barsCount[level]; i++) {
+            for (let i = 0; i < validBarsCount; i++) {
                 let data = "";
                 const o = i === 0 ? 0 : this.lengths[level].sum[i - 1];
                 t:
@@ -862,8 +865,6 @@ phina.define("MainScene", {
         }, this);
 
         const json = JSON.stringify(this.json, null, " ");
-
-        // console.timeEnd("export");
 
         return json;
     },
@@ -994,8 +995,29 @@ phina.define("MainScene", {
     updateNoteMeasure: function() {
         this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note", 48: "Whole Note"}[this.noteMeasure];
         this.currentLine.width = {2: 260, 3: 260, 6: 330, 12: 400, 48: 430}[this.noteMeasure];
+    },
+    findLastBarHavingNotes: function(level) {
+        let lastPos = 0;
+        this.notesData[level].forEach(function (v, i) {
+            if (v[0] !== NOTHING || v[1] !== NOTHING || v[2] !== NOTHING || v[3] !== NOTHING) {
+                lastPos = Math.max(lastPos, i);
+            }
+        });
+        this.tripletNotesData[level].forEach(function (v, i) {
+            if (v[0] !== NOTHING || v[1] !== NOTHING || v[2] !== NOTHING || v[3] !== NOTHING) {
+                lastPos = Math.max(lastPos, Math.floor(i / 3) * 2);
+            }
+        });
+
+        let ret = this.barsCount[level];
+        this.lengths[level].sum.forEach(function (sum, i) {
+            if (lastPos < sum) {
+                ret = Math.min(ret, i);
+            }
+        });
+        return ret;
     }
-});
+ });
 
 // 各小節の長さを管理するクラス
 phina.define("Lengths", {
