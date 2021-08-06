@@ -798,7 +798,16 @@ phina.define("MainScene", {
                 if(!this.notesCountOfBar[key][i]) this.notesCountOfBar[key][i] = 0;
                 if(!this.attackNotesCountOfBar[key][i]) this.attackNotesCountOfBar[key][i] = 0;
             }
+
+
         }, this);
+
+        if (!this.json.title) {
+            this.json.title = "タイトルなし";
+        }
+        if (!this.json.artist) {
+            this.json.artist = "アーティストなし";
+        }
 
         this.fullUpdate();
     },
