@@ -461,6 +461,7 @@ phina.define("MainScene", {
             fileReader.onload = function(event) {
                 this.import(JSON.parse(event.target.result));
                 this.id = undefined;
+                this.save();
             }.bind(this);
             fileReader.readAsText(file);
         }.bind(this);
