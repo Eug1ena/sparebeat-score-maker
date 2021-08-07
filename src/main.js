@@ -107,7 +107,7 @@ phina.define("MainScene", {
 
         this.lengths = { easy: Lengths(), normal: Lengths(), hard: Lengths()};
         this.screenBottom = DisplayElement({y: this.height}).addChildTo(this);
-        this.score = DisplayElement({x: SCREEN_CENTER_X, y: -LINE_Y + 15}).addChildTo(this.screenBottom);
+        this.score = DisplayElement({x: SCREEN_CENTER_X, y: -LINE_Y}).addChildTo(this.screenBottom);
         this.dencityGraph = DisplayElement({y: -9}).addChildTo(this.screenBottom);
         this.dencityGraph.alpha = 0.3;
         this.limitline = PathShape({x: 8 + 240 / 9, strokeWidth: 2, paths: [Vector2(0, 0), Vector2(0, this.height)]}).addChildTo(this);
@@ -998,9 +998,9 @@ phina.define("MainScene", {
         if (this.isTripletSelected) this.currentLine.height = this.NOTES_INTERVAL / 3 * 2;
         else this.currentLine.height = this.NOTES_INTERVAL;
 
-        this.score.y = -LINE_Y + (this.currentLinePos / 3) * this.NOTES_INTERVAL + (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
+        this.score.y = -LINE_Y + (this.currentLinePos / 3) * this.NOTES_INTERVAL;
 
-        this.currentLine.y = -this.score.y + -LINE_Y;
+        this.currentLine.y = -this.score.y + -LINE_Y - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
     },
     updateNoteMeasure: function() {
         this.noteMeasureLabel.text = "Selected: " + {2: "24th Note", 3: "16th Note", 6: "8th Note", 12: "4th Note", 48: "Whole Note"}[this.noteMeasure];
