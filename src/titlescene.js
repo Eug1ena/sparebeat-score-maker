@@ -7,12 +7,12 @@ phina.define("TitleScene", {
         const saves = JSON.parse(localStorage.getItem("saves") || "[]");
 
         this.center = DisplayElement({x: SCREEN_CENTER_X, y: this.height / 2}).addChildTo(this);
-        const group = List(true, 50, {y: -195}).addChildTo(this.center);
+        const group = List(true, 35, {y: -195}).addChildTo(this.center);
 
         this.chartElements = [];
         const newChartElem = RectangleShape({
             width: SCREEN_WIDTH,
-            height: 70,
+            height: 60,
             x: 0,
             y: -160,
             fill: "#ffd4f1",
@@ -22,13 +22,13 @@ phina.define("TitleScene", {
         Label({
             x: 0, y: 0,
             text: "Create New Chart",
-            fontSize: 25
+            fontSize: 24
         }).addChildTo(newChartElem);
 
         saves.forEach(function(chart, index) {
             const elem = RectangleShape({
                 width: SCREEN_WIDTH,
-                height: 150,
+                height: 135,
                 fill: index === 0 ? "#ffb0e5" : "#ffd4f1",
                 stroke: null
             }).addChildTo(group);
@@ -37,15 +37,15 @@ phina.define("TitleScene", {
             Label({
                 x: 0, y: -20,
                 text: chart.json.title,
-                fontSize: 35
+                fontSize: 30
             }).addChildTo(elem);
             Label({
-                x: 0, y: 30,
+                x: 0, y: 25,
                 text: "by " + chart.json.artist,
-                fontSize: 25
+                fontSize: 24
             }).addChildTo(elem);
 
-            const deleteButton = Button({x: 400, y: 40, fill: "#524b4b", text: "Delete", width: 100, height: 40, fontSize: 16}).addChildTo(elem);
+            const deleteButton = Button({x: 400, y: 40, fill: "#524b4b", text: "Delete", width: 90, height: 35, fontSize: 14}).addChildTo(elem);
             deleteButton.on("pointstart", function() {
                 if (window.confirm(chart.json.title + "を本当に削除しますか？")) {
                     goUp();
@@ -72,7 +72,7 @@ phina.define("TitleScene", {
                 this.selectedIndex--;
                 this.chartElements[this.selectedIndex].elem.fill = "#ffb0e5";
 
-                group.y += 200;
+                group.y += 135 + 35;
             }
         }.bind(this);
         const goDown = function() {
@@ -82,7 +82,7 @@ phina.define("TitleScene", {
                 this.selectedIndex++;
                 this.chartElements[this.selectedIndex].elem.fill = "#ffb0e5";
 
-                group.y -= 200;
+                group.y -= 135 + 35;
             }
         }.bind(this);
         shortcut.add("Up", goUp);
