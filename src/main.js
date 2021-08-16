@@ -494,15 +494,16 @@ phina.define("MainScene", {
             if (!result) console.error("export failed!");
         }.bind(this));
 
+        this.isKeyDown = [false, false, false, false];
+        this.isSettingLongNote = [false, false, false, false];
+        this.longNoteStart = [-1, -1, -1, -1];
         shortcut.add("Up", function() {
             if(this.currentLinePos + this.noteMeasure < this.lengths[this.level].sum.slice(-1) * 3){
-                this.currentLinePos += this.noteMeasure;
+                this.changeCurrentLinePosTo(this.currentLinePos + this.noteMeasure);
             }
-            this.updateCurrentLine();
         }.bind(this));
         shortcut.add("Down", function() {
-            this.currentLinePos = Math.max(this.currentLinePos - this.noteMeasure, 0);
-            this.updateCurrentLine();
+            this.changeCurrentLinePosTo(Math.max(this.currentLinePos - this.noteMeasure, 0));
         }.bind(this));
         shortcut.add("Ctrl+Up", function() {
             this.currentLinePos = Math.max(this.currentLinePos, this.lengths[this.level].sum.slice(-2, -1) * 3);
@@ -566,22 +567,26 @@ phina.define("MainScene", {
             }
         }.bind(this));
 
-        shortcut.add("1", function() {
-            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 0);
-            else this.toggleNoteAt(this.currentLinePos / 3, 0);
-        }.bind(this));
-        shortcut.add("2", function() {
-            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 1);
-            else this.toggleNoteAt(this.currentLinePos / 3, 1);
-        }.bind(this));
-        shortcut.add("3", function() {
-            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 2);
-            else this.toggleNoteAt(this.currentLinePos / 3, 2);
-        }.bind(this));
-        shortcut.add("4", function() {
-            if (this.isTripletSelected) this.toggleTripletNoteAt(this.currentLinePos / 2, 3);
-            else this.toggleNoteAt(this.currentLinePos / 3, 3);
-        }.bind(this));
+        for (let i = 0; i < 4; i++) {
+            keyName = ["1", "2", "3", "4"][i];
+
+            shortcut.add(keyName, function() {
+                let afterNote;
+
+                if (this.isTripletSelected) afterNote = this.toggleTripletNoteAt(this.currentLinePos / 2, i);
+                else afterNote = this.toggleNoteAt(this.currentLinePos / 3, i);
+
+                if (afterNote !== NOTHING) {
+                    this.isKeyDown[i] = true;
+                    this.longNoteStart[i] = this.currentLinePos;
+                }
+            }.bind(this), {type: "keydown"})
+
+            shortcut.add(keyName, function() {
+                this.isKeyDown[i] = false;
+                this.longNoteStart[i] = -1;
+            }.bind(this), {type: "keyup"});
+        }
 
         this.initSongFileButton();
 
@@ -937,52 +942,74 @@ phina.define("MainScene", {
         this.fullUpdate();
     },
     toggleNoteAt: function(i, lane) {
-        if (this.isTripletSelected) return;
         if (this.notesData[this.level][i][lane]) {
+            this.setNoteAt(i, lane, NOTHING);
+            return NOTHING;
+        } else {
+            this.setNoteAt(i, lane, this.notetype);
+            return this.notetype;
+        }
+    },
+    toggleTripletNoteAt: function(i, lane) {
+        if (this.notesData[this.level][i][lane]) {
+            this.setTripletNoteAt(i, lane, NOTHING);
+            return NOTHING;
+        } else {
+            this.setTripletNoteAt(i, lane, this.notetype);
+            return this.notetype;
+        }
+    },
+    setNoteAt: function(i, lane, note) {
+        if (this.isTripletSelected) return;
+        if (note == this.notesData[this.level][i][lane]) return;
+
+        if (note == NOTHING) {
             this.notesCount[this.level]--;
             this.notesCountOfBar[this.level][Math.floor(i / 16)]--;
             if (this.notesData[this.level][i][lane] === ATTACK) {
                 this.attackNotesCount[this.level]--;
                 this.attackNotesCountOfBar[this.level][Math.floor(i / 16)]--;
             }
-            this.notesData[this.level][i][lane] = NOTHING;
+            this.notesData[this.level][i][lane] = note;
         } else {
             this.notesCount[this.level]++;
             this.notesCountOfBar[this.level][Math.floor(i / 16)]++;
-            if (this.notetype === ATTACK) {
+            if (note === ATTACK) {
                 this.attackNotesCount[this.level]++;
                 this.attackNotesCountOfBar[this.level][Math.floor(i / 16)]++;
             }
-            this.notesData[this.level][i][lane] = this.notetype;
+            this.notesData[this.level][i][lane] = note;
         }
         this.noteButtons[i][lane].fill = colorOf(this.notesData[this.level][i][lane]);
         this.updateNotesCount();
         this.save();
-        this.tripletNotes.reset();
+        this.notes.reset();
     },
-    toggleTripletNoteAt: function(i, lane) {
+    setTripletNoteAt: function(i, lane, note) {
         if (!this.isTripletSelected) return;
-        if (this.tripletNotesData[this.level][i][lane]) {
+        if (note == this.tripletNotesData[this.level][i][lane]) return;
+
+        if (note == NOTHING) {
             this.notesCount[this.level]--;
             this.notesCountOfBar[this.level][Math.floor(i / 24)]--;
             if (this.tripletNotesData[this.level][i][lane] === ATTACK) {
                 this.attackNotesCount[this.level]--;
                 this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]--;
             }
-            this.tripletNotesData[this.level][i][lane] = NOTHING;
+            this.tripletNotesData[this.level][i][lane] = note;
         } else {
             this.notesCount[this.level]++;
             this.notesCountOfBar[this.level][Math.floor(i / 24)]++;
-            if (this.notetype === ATTACK) {
-                this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]++;
+            if (note === ATTACK) {
                 this.attackNotesCount[this.level]++;
+                this.attackNotesCountOfBar[this.level][Math.floor(i / 24)]++;
             }
-            this.tripletNotesData[this.level][i][lane] = this.notetype;
+            this.tripletNotesData[this.level][i][lane] = note;
         }
         this.tripletNoteButtons[i][lane].fill = colorOf(this.tripletNotesData[this.level][i][lane]);
         this.updateNotesCount();
         this.save();
-        this.notes.reset();
+        this.tripletNotes.reset();
     },
     changeNoteType: function() {
         if (++this.notetype > LONG_END) this.notetype = NORMAL;
@@ -990,6 +1017,39 @@ phina.define("MainScene", {
         this.noteTypeButton.fill = colorOf(this.notetype);
 
         this.currentLine.fill = colorOf(this.notetype);
+    },
+    changeCurrentLinePosTo: function(pos) {
+        for(let i = 0; i < 4; i++){
+            if(this.isKeyDown[i] && this.isSettingLongNote[i]){
+                if (this.isTripletSelected) this.setTripletNoteAt(Math.floor(this.currentLinePos / 2), i, NOTHING);
+                else this.setNoteAt(Math.floor(this.currentLinePos / 3), i, NOTHING);
+            }
+        }
+
+        this.currentLinePos = pos;
+        this.updateCurrentLine();
+
+        for(let i = 0; i < 4; i++){
+            if(this.isKeyDown[i]){
+                if(this.currentLinePos <= this.longNoteStart[i]){
+                    this.isSettingLongNote[i] = false;
+                    if(this.currentLinePos < this.longNoteStart[i]){
+                        this.isKeyDown[i] = false;
+                    }
+
+                    if (this.isTripletSelected) this.setTripletNoteAt(Math.floor(this.longNoteStart[i] / 2), i, this.notetype);
+                    else this.setNoteAt(Math.floor(this.longNoteStart[i] / 3), i, this.notetype);
+                }else{
+                    this.isSettingLongNote[i] = true;
+
+                    if (this.isTripletSelected) this.setTripletNoteAt(Math.floor(this.longNoteStart[i] / 2), i, LONG_START);
+                    else this.setNoteAt(Math.floor(this.longNoteStart[i] / 3), i, LONG_START);
+
+                    if (this.isTripletSelected) this.setTripletNoteAt(Math.floor(this.currentLinePos / 2), i, LONG_END);
+                    else this.setNoteAt(Math.floor(this.currentLinePos / 3), i, LONG_END);
+                }
+            }
+        }
     },
     updateCurrentLine: function() {
         this.currentLinePos = Math.min(Math.max(this.currentLinePos, 0), this.lengths[this.level].sum.slice(-1) * 3 - 1);
