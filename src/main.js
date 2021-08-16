@@ -125,12 +125,21 @@ phina.define("MainScene", {
         this.extend = Button({x: -320, y: 40 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16, text: "+", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]++;
             if (this.lengths[this.level].length < this.barsCount[this.level]) this.lengths[this.level].push(16);
+
+            this.notes.reset();
+            this.tripletNotes.reset();
             this.updateBarsCount();
             this.save();
         }.bind(this)).addChildTo(this.score);
         this.cut = Button({x: -320, y: 520 - BARS_COUNT_INITIAL * this.NOTES_INTERVAL * 16, text: "-", width: 48, height: 48}).on("pointstart", function() {
             this.barsCount[this.level]--;
             this.lengths[this.level].cut();
+
+            const nextPos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
+            this.changeCurrentLinePosTo(Math.floor(nextPos / this.noteMeasure) * this.noteMeasure, true);
+
+            this.notes.reset();
+            this.tripletNotes.reset();
             this.updateBarsCount();
             this.save();
         }.bind(this)).addChildTo(this.score);
@@ -194,6 +203,7 @@ phina.define("MainScene", {
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] + 4);
 
                     this.notes.reset();
+                    this.tripletNotes.reset();
                     this.updateBarsCount();
                     this.save();
                 }.bind(this)).addChildTo(root);
@@ -202,11 +212,11 @@ phina.define("MainScene", {
                     const index = this.lengths[this.level].sum.indexOf(i);
                     this.lengths[this.level].set(index, this.lengths[this.level].diff[index] - 4);
 
-                    this.currentLinePos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
-                    this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
-                    this.updateCurrentLine();
-                    // this.currentLine.y = -(this.currentLinePos / 3) * this.NOTES_INTERVAL - (this.isTripletSelected ? this.NOTES_INTERVAL / 3 : this.NOTES_INTERVAL / 2);
+                    const nextPos = Math.min(this.currentLinePos, this.lengths[this.level].sum.slice(-1) * 3 - 3);
+                    this.changeCurrentLinePosTo(Math.floor(nextPos / this.noteMeasure) * this.noteMeasure, true);
+
                     this.notes.reset();
+                    this.tripletNotes.reset();
                     this.updateBarsCount();
                     this.save();
                 }.bind(this)).addChildTo(root);
@@ -506,20 +516,20 @@ phina.define("MainScene", {
             this.changeCurrentLinePosTo(Math.max(this.currentLinePos - this.noteMeasure, 0));
         }.bind(this));
         shortcut.add("Ctrl+Up", function() {
-            this.currentLinePos = Math.max(this.currentLinePos, this.lengths[this.level].sum.slice(-2, -1) * 3);
-            this.updateCurrentLine();
+            if(this.currentLinePos < this.lengths[this.level].sum.slice(-2, -1) * 3){
+                this.changeCurrentLinePosTo(this.lengths[this.level].sum.slice(-2, -1) * 3, true);
+            }
         }.bind(this));
         shortcut.add("Meta+Up", function() {
-            this.currentLinePos = Math.max(this.currentLinePos, this.lengths[this.level].sum.slice(-2, -1) * 3);
-            this.updateCurrentLine();
+            if(this.currentLinePos < this.lengths[this.level].sum.slice(-2, -1) * 3){
+                this.changeCurrentLinePosTo(this.lengths[this.level].sum.slice(-2, -1) * 3, true);
+            }
         }.bind(this));
         shortcut.add("Ctrl+Down", function() {
-            this.currentLinePos = 0;
-            this.updateCurrentLine();
+            this.changeCurrentLinePosTo(0, true);
         }.bind(this));
         shortcut.add("Meta+Down", function() {
-            this.currentLinePos = 0;
-            this.updateCurrentLine();
+            this.changeCurrentLinePosTo(0, true);
         }.bind(this));
 
         this.noteMeasure = 12;
@@ -537,7 +547,7 @@ phina.define("MainScene", {
             else if (this.noteMeasure === 6) this.noteMeasure = 12;
             else if (this.noteMeasure === 12) this.noteMeasure = 48;
 
-            if (this.noteMeasure !== 48) this.currentLinePos = Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure;
+            if (this.noteMeasure !== 48) this.changeCurrentLinePosTo(Math.floor(this.currentLinePos / this.noteMeasure) * this.noteMeasure);
             this.updateCurrentLine();
 
             this.updateNoteMeasure();
@@ -583,8 +593,7 @@ phina.define("MainScene", {
             }.bind(this), {type: "keydown"})
 
             shortcut.add(keyName, function() {
-                this.isKeyDown[i] = false;
-                this.longNoteStart[i] = -1;
+                this.finishLongNote();
             }.bind(this), {type: "keyup"});
         }
 
@@ -920,6 +929,7 @@ phina.define("MainScene", {
     },
     toggleTripletVisibility: function() {
         this.isTripletSelected = !this.isTripletSelected;
+        this.finishLongNote();
 
         if (this.noteMeasure === 3) {
             this.noteMeasure = 2;
@@ -1018,7 +1028,11 @@ phina.define("MainScene", {
 
         this.currentLine.fill = colorOf(this.notetype);
     },
-    changeCurrentLinePosTo: function(pos) {
+    changeCurrentLinePosTo: function(pos, isCutLongNote = false) {
+        if (isCutLongNote) {
+            this.finishLongNote();
+        }
+
         for(let i = 0; i < 4; i++){
             if(this.isKeyDown[i] && this.isSettingLongNote[i]){
                 if (this.isTripletSelected) this.setTripletNoteAt(Math.floor(this.currentLinePos / 2), i, NOTHING);
@@ -1049,6 +1063,13 @@ phina.define("MainScene", {
                     else this.setNoteAt(Math.floor(this.currentLinePos / 3), i, LONG_END);
                 }
             }
+        }
+    },
+    finishLongNote: function() {
+        for(let i = 0; i < 4; i++){
+            this.isKeyDown[i] = false;
+            this.isSettingLongNote[i] = false;
+            this.longNoteStart[i] = -1;
         }
     },
     updateCurrentLine: function() {
