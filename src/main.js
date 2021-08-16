@@ -961,7 +961,7 @@ phina.define("MainScene", {
         }
     },
     toggleTripletNoteAt: function(i, lane) {
-        if (this.notesData[this.level][i][lane]) {
+        if (this.tripletNotesData[this.level][i][lane]) {
             this.setTripletNoteAt(i, lane, NOTHING);
             return NOTHING;
         } else {
@@ -1022,7 +1022,7 @@ phina.define("MainScene", {
         this.tripletNotes.reset();
     },
     changeNoteType: function() {
-        if (++this.notetype > LONG_END) this.notetype = NORMAL;
+        if (++this.notetype > ATTACK) this.notetype = NORMAL;
         this.noteTypeButton.text = ["Normal Notes", "Attack Notes", "Long-Start", "Long-End"][this.notetype - 1];
         this.noteTypeButton.fill = colorOf(this.notetype);
 
