@@ -47,7 +47,7 @@ phina.define("TitleScene", {
 
             const deleteButton = Button({x: 400, y: 40, fill: "#524b4b", text: "Delete", width: 90, height: 35, fontSize: 14}).addChildTo(elem);
             deleteButton.on("pointstart", function() {
-                if (window.confirm(chart.json.title + "を本当に削除しますか？")) {
+                if (window.confirm(chart.json.title + "の譜面を本当に削除しますか？")) {
                     goUp();
 
                     const item = this.chartElements.find(v => v.number === index);
