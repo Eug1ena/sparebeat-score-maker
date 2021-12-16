@@ -465,6 +465,10 @@ phina.define("MainScene", {
             this.app.pushScene(MetaSettingScene(this));
         }.bind(this)).addChildTo(this);
 
+        Button({text: "Testplay!", fontSize: 22, fill: "#4f9e47"}).setPosition(this.BUTTONS_X, 530).on("pointstart", function() {
+            
+        }.bind(this)).addChildTo(this);
+
         const importFile = function(file) {
             const fileReader = new FileReader();
             fileReader.onload = function(event) {
