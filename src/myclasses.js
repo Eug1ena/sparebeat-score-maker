@@ -167,6 +167,10 @@ phina.define("Music", {
     },
     isSet: function() {
         return !!this.element.src;
+    },
+    getSrc: function() {
+        console.log(this.element.src)
+        return this.element.src;
     }
 
 });

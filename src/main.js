@@ -465,8 +465,22 @@ phina.define("MainScene", {
             this.app.pushScene(MetaSettingScene(this));
         }.bind(this)).addChildTo(this);
 
-        Button({text: "Testplay!", fontSize: 22, fill: "#4f9e47"}).setPosition(this.BUTTONS_X, 530).on("pointstart", function() {
-            
+        Button({text: "Playtest!", fontSize: 22, fill: "#4f9e47"}).setPosition(this.BUTTONS_X, 530).on("pointstart", function() {
+            if(!this.music.isSet()){
+                alert("テストプレイするには、Load Songボタンから音声ファイルを選択してください。");
+                return;
+            }
+
+            const musicUrl = this.music.getSrc();
+            localforage.setItem("musicUrl", musicUrl);
+            console.log(localforage.getItem("musicUrl"));
+
+            const jsonUrl = `data:application/json;base64,${
+                window.btoa(unescape(encodeURIComponent(this.export())))
+            }`;
+            localStorage.setItem("jsonUrl", jsonUrl);
+
+            window.open("playtest.html");
         }.bind(this)).addChildTo(this);
 
         const importFile = function(file) {
