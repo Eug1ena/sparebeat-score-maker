@@ -480,7 +480,7 @@ phina.define("MainScene", {
             }`;
             localStorage.setItem("jsonUrl", jsonUrl);
 
-            window.open("playtest.html");
+            window.open("html/playtest.html");
         }.bind(this)).addChildTo(this);
 
         const importFile = function(file) {
