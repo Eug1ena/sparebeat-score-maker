@@ -31,7 +31,7 @@ phina.define("MetaSettingScene", {
 			const ret = prompt("BPMを入力してください。", this.json.bpm);
 			if(ret){
 				const bpm = parseFloat(ret);
-				if(bpm){
+				if(bpm || bpm === 0){
 					this.json.bpm = bpm;
 					label.text = bpm;
 					this.isEdited = true;
@@ -44,7 +44,7 @@ phina.define("MetaSettingScene", {
 			const ret = prompt("startTimeを入力してください。", this.json.startTime);
 			if(ret){
 				const startTime = parseInt(ret);
-				if(startTime){
+				if(startTime || startTime === 0){
 					this.json.startTime = startTime;
 					label.text = startTime;
 					this.isEdited = true;
